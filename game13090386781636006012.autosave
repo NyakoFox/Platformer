@@ -1,0 +1,512 @@
+import java.io.File;
+
+Game game;
+Input input;
+
+void setup() {
+    // Resize the screen to my favorite resolution
+    size(640, 480);
+    surface.setTitle("Platforming");
+    surface.setResizable(false);
+    frameRate(30);
+    game = new Game();
+    input = new Input();
+    loop();
+    noSmooth();
+}
+
+void draw() {
+    // Process the game
+    game.draw();
+    input.changeKeys();
+}
+
+void keyPressed() {
+    input.keyPressed(keyCode);
+}
+
+void keyReleased() {
+    input.keyReleased(keyCode);
+}
+
+class Input {
+    int[] keyStatus = new int[256];
+
+    void keyPressed(int keyCode) {
+        if (keyStatus[keyCode] <= 0) { // Ignore key repeat
+            keyStatus[keyCode] = 1;
+        }
+    }
+
+    void keyReleased(int keyCode) {
+        keyStatus[keyCode] = -1;
+    }
+
+    int getKeyStatus(String key) {
+        int keyCode = (int) key.charAt(0);
+        switch (key) {
+            case "left":   keyCode = 37; break;
+            case "right":  keyCode = 39; break;
+            case "up":     keyCode = 38; break;
+            case "down":   keyCode = 40; break;
+            case "space":  keyCode = 32; break;
+            case "enter":  keyCode = 13; break;
+            case "escape": keyCode = 27; break;
+        }
+        return keyStatus[keyCode];
+    }
+
+    boolean down(String key) {
+        return getKeyStatus(key) >= 1;
+    }
+
+    boolean pressed(String key) {
+        return getKeyStatus(key) == 1;
+    }
+
+    boolean released(String key) {
+        return getKeyStatus(key) == -1;
+    }
+
+    boolean up(String key) {
+        return getKeyStatus(key) <= 0;
+    }
+
+    void changeKeys() {
+        for (int i = 0; i < keyStatus.length; i++) {
+            if (keyStatus[i] == 1) {
+                keyStatus[i] = 2;
+            }
+            if (keyStatus[i] == -1) {
+                keyStatus[i] = 0;
+            }
+        }
+    }
+
+}
+
+class Game {
+    ArrayList<Entity> entities;
+    Player player;
+    Map current_map;
+    // Store the player separately since we'll be
+    // referencing them a lot
+    Game() {
+        entities = new ArrayList<>();
+        setupGame();
+        current_map = loadMap("test");
+    }
+
+    void setupGame() {
+        entities.clear(); // Clear the entity list
+    }
+
+    Map loadMap(String name) {
+        entities.clear(); // Clear the entity list
+
+        player = new Player(320, 240); // Make a new player in the center
+        entities.add(player); // The player is an entity
+
+        // Load the map
+        Map map = new Map(name);
+
+        return map;
+    }
+
+    Player getPlayer() {
+        return player;
+    }
+
+    // Draw
+    void draw() {
+        // Loop through all entities and run their logic.
+        for (int i = 0; i < entities.size(); i++) {
+            entities.get(i).update();
+        }
+
+        // Draw a backdrop
+        background(0);
+
+        // Draw the map
+        current_map.draw();
+
+        // Loop through all entities and draw them.
+        for (int i = 0; i < entities.size(); i++) {
+            entities.get(i).draw();
+        }
+    }
+}
+
+class Player extends Entity {
+
+    double walking_speed = 10;
+    double current_walk_speed = 0;
+    double walking_acceleration = 1;
+    double ground_deceleration = 1;
+    boolean squishing = false;
+
+    Player(int x, int y) {
+        super("player", x, y, 16, 10);
+
+        sprite_offset_x = 0;
+        sprite_offset_y = -10;
+
+        registerAnimationSpeed("idle", 0.1);
+        registerAnimationSpeed("squish", 0.5);
+
+        enableGravity(true);
+    }
+
+    void jump() {
+        addVelocity(0, -16);
+    }
+
+    void update() {
+        if (input.pressed("Z")) {
+            if (onGround()) {
+                jump();
+            }
+        }
+
+        double horizontal_speed_cap = walking_speed;
+
+        if (input.down("left")) {
+		    // If you're holding left, and you're not already at max walking speed...
+		    if ((x_velocity) > -horizontal_speed_cap) {
+		    	// Make them walk faster
+		    	x_velocity -= walking_acceleration;
+		    }
+    	} else {
+    		// Otherwise, if you're not holding left, slow them down if they're on the ground...
+    		if ((x_velocity < 0) && onGround()) {
+    			x_velocity += ground_deceleration;
+    			// But make sure we don't send them in the other direction.
+    			if (x_velocity > 0) x_velocity = 0;
+    		}
+    	}
+
+
+    	if (input.down("right")) {
+    		// If you're holding right, and you're not already at max walking speed...
+    		if ((x_velocity) < horizontal_speed_cap) {
+    			// Make them walk faster
+    			x_velocity += walking_acceleration;
+    		}
+    	} else {
+    		// Otherwise, if you're not holding right, slow them down if they're on the ground...
+    		if ((x_velocity > 0) && onGround()) {
+    			x_velocity -= ground_deceleration;
+    			// But make sure we don't send them in the other direction.
+    			if (x_velocity < 0) x_velocity = 0;
+    		}
+    	}
+
+        boolean wasOnGround = onGround();
+        super.update();
+
+        if (!wasOnGround && onGround()) {
+            squishing = true;
+            setAnimation("squish", 0.5);
+        }
+        updateAnimation();
+    }
+
+    void updateAnimation() {
+        if (!squishing) {
+            setAnimation("idle", 0.1);
+        }
+    }
+
+    void animationLooped(String animation) {
+        if (animation.equals("squish")) {
+            squishing = false;
+        }
+    }
+}
+
+class Entity {
+    int x, y, width, height;
+    double x_velocity, y_velocity;
+    double x_scale, y_scale;
+    boolean uses_gravity;
+    double gravity;
+    double max_gravity;
+    String id;
+    HashMap<String, ArrayList<PImage>> sprites;
+    HashMap<String, Float> animation_speeds;
+    String animation;
+    double animation_timer;
+    int animation_index;
+    double animation_speed;
+    double sprite_offset_x;
+    double sprite_offset_y;
+
+    // Initialize variables
+    Entity(String id, int x, int y, int width, int height) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.x_scale = 2;
+        this.y_scale = 2;
+
+        this.sprite_offset_x = 0;
+        this.sprite_offset_y = 0;
+
+        this.x_velocity = 0d;
+        this.y_velocity = 0d;
+
+        uses_gravity = false;
+
+        gravity = 1.2d;
+        max_gravity = 12d;
+
+        animation_timer = 0;
+        animation_index = 0;
+        animation_speed = 1;
+
+        animation_speeds = new HashMap<>();
+        registerSprites();
+    }
+
+    void registerAnimationSpeed(String animation, float speed) {
+        animation_speeds.put(animation, speed);
+    }
+
+    double getWidth() {
+        return width * x_scale;
+    }
+
+    double getHeight() {
+        return height * y_scale;
+    }
+
+    void setAnimation(String animation, double speed) {
+        this.animation = animation;
+        animation_timer = 0;
+        animation_index = 0;
+        animation_speed = speed;
+    }
+
+    void setAnimation(String animation) {
+        this.animation = animation;
+        animation_timer = 0;
+        animation_index = 0;
+        if (animation_speeds.containsKey(animation)) {
+            animation_speed = animation_speeds.get(animation);
+        } else {
+            animation_speed = 1;
+        }
+    }
+
+    void registerSprites() {
+        // Loop through the sprites directory
+        File dir = new File(sketchPath() + "/sprites/" + id + "/");
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            String name = files[i].getName();
+            String path = files[i].getAbsolutePath();
+            if (files[i].isFile()) {
+                ArrayList<PImage> images = new ArrayList<>();
+                images.add(loadImage(path));
+                sprites.put(name, images);
+            } else {
+                ArrayList<PImage> images = new ArrayList<>();
+                for (int j = 0; j < files[i].listFiles().length; j++) {
+                    images.add(loadImage(files[i].listFiles()[j].getAbsolutePath()));
+                }
+                sprites.put(name, images);
+            }
+        }
+    }
+
+    void enableGravity(boolean enable) {
+        uses_gravity = enable;
+    }
+
+    void setVelocity(double x, double y) {
+        x_velocity = x;
+        y_velocity = y;
+    }
+
+    void addVelocity(double x, double y) {
+        x_velocity += x;
+        y_velocity += y;
+    }
+
+    void animationLooped(String animation) {
+        // for other things to extend
+    }
+
+    void update() {
+        animation_timer += animation_speed;
+        while (animation_timer >= 1) {
+            animation_timer -= 1;
+            animation_index++;
+            if (animation_index >= sprites.get(animation).size()) {
+                animationLooped(animation);
+                animation_index = 0;
+            }
+        }
+
+        if (uses_gravity) {
+             if (y_velocity < max_gravity) {
+                 y_velocity += Double.min(gravity, max_gravity);
+             }
+        }
+
+        // Check for map collision horizontally
+
+        int multiplier_x = (int) Math.signum(x_velocity);
+        int multiplier_y = (int) Math.signum(y_velocity);
+
+        float precision = 0.1;
+        int infinite = 0;
+        while (isInSolid(x + x_velocity, y)) {
+            x_velocity -= (precision * multiplier_x);
+            infinite++;
+            if (infinite > 1000) break;
+        }
+
+        infinite = 0;
+        while (isInSolid(x, y + y_velocity)) {
+            y_velocity -= (precision * multiplier_y);
+            infinite++;
+            if (infinite > 1000) break;
+        }
+
+        x += x_velocity;
+        y += y_velocity;
+    }
+
+    boolean isInSolid(double x, double y) {
+        // Check if we're inside a solid tile, taking into account width and height.
+        // use AABB collision detection.
+        return game.current_map.isPosInSolid(x, y) || game.current_map.isPosInSolid(x + getWidth(), y) || game.current_map.isPosInSolid(x, y + getHeight()) || game.current_map.isPosInSolid(x + getWidth(), y + getHeight());
+    }
+
+    boolean onGround() {
+        return isInSolid(x, y + getHeight() + 2);
+    }
+
+    void draw() {
+        // Draw debug rectangle of width and height
+        fill(255, 0, 0);
+        rect((float) x, (float) y, (float) getWidth(), (float) getHeight());
+
+        if ((animation != null) && (sprites.get(animation) != null)) {
+            var current_image = sprites.get(animation).get(animation_index);
+            var draw_x = x + sprite_offset_x;
+            var draw_y = y + sprite_offset_y;
+            image(current_image, (float) draw_x, (float) draw_y, (float) (current_image.width * x_scale), (float) (current_image.height * y_scale));
+        }
+    }
+}
+
+class Map {
+    int width, height;
+    ArrayList<int[][]> layers;
+    boolean[][] collision;
+    Tileset tileset;
+
+    Map(int width, int height, Tileset tileset) {
+        this.width = width;
+        this.height = height;
+        this.tileset = tileset;
+
+        collision = new boolean[height][width];
+
+        this.layers = new ArrayList<>();
+        layers.add(new int[height][width]);
+    }
+
+    Map(int width, int height, String tileset) {
+        this(width, height, new Tileset(tileset));
+    }
+
+    Map(String filename) {
+        JSONObject json = loadJSONObject("maps/" + filename + ".json");
+        this.width = json.getInt("width");
+        this.height = json.getInt("height");
+        JSONArray layers = json.getJSONArray("layers");
+        this.layers = new ArrayList<>();
+        for (int i = 0; i < layers.size(); i++) {
+            JSONArray layer = layers.getJSONArray(i);
+            int[][] layer_data = new int[height][width];
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    layer_data[y][x] = layer.getJSONArray(y).getInt(x);
+                }
+            }
+            this.layers.add(layer_data);
+        }
+        this.tileset = new Tileset(json.getString("tileset"));
+        // Load collision
+        JSONArray collision_data = json.getJSONArray("collision");
+        this.collision = new boolean[height][width];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int data = collision_data.getJSONArray(y).getInt(x);
+                collision[y][x] = (data == 1); // Possibly support other collision types in the future
+            }
+        }
+    }
+
+    int getTile(int layer, int x, int y) {
+        return layers.get(layer)[y][x];
+    }
+
+    boolean isPosInSolid(double x, double y) {
+        return isSolid((int) (x / 32), (int) (y / 32));
+    }
+
+    boolean isSolid(int x, int y) {
+        // Check bounds
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+            return false;
+        }
+        return collision[y][x];
+    }
+
+    void draw() {
+        for (int i = 0; i < layers.size(); i++) {
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int tile = layers.get(i)[y][x];
+                    if (tile != 0) {
+                        tileset.drawTile(x * 32, y * 32, tile);
+                    }
+                }
+            }
+        }
+    }
+}
+
+class Tileset {
+    ArrayList<PImage> tiles;
+    int horizontal_tiles, vertical_tiles;
+    Tileset(String filename) {
+        PImage image = loadImage("tilesets/" + filename + ".png");
+        horizontal_tiles = image.width / 32;
+        vertical_tiles = image.height / 32;
+
+        tiles = new ArrayList<>();
+
+        // Split the image into tiles
+        for (int y = 0; y < vertical_tiles; y++) {
+            for (int x = 0; x < horizontal_tiles; x++) {
+                tiles.add(image.get(x * 16, y * 16, 16, 16));
+            }
+        }
+    }
+
+    void drawTile(int x, int y, int tile) {
+        // Get the tile's position in the tileset using the tile's index
+
+        //int tile_x = tile % horizontal_tiles;
+        //int tile_y = tile / horizontal_tiles;
+
+        image(tiles.get(tile), x, y, 32, 32);
+    }
+}

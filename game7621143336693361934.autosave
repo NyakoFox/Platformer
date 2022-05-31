@@ -1,0 +1,167 @@
+import java.io.File;
+
+Game game;
+
+void setup() {
+    // Resize the screen to my favorite resolution
+    size(640, 480);
+    surface.setTitle("Platforming");
+    surface.setResizable(false);
+    frameRate(30);
+    game = new Game();
+    loop();
+    noSmooth();
+}
+
+void draw() {
+    // Draw a background
+    game.draw();
+}
+
+void keyPressed() {
+    game.keyPressed(keyCode);
+}
+
+class Game {
+    ArrayList<Entity> entities;
+    Player player;
+    // Store the player separately since we'll be
+    // referencing them a lot
+    Game() {
+        entities = new ArrayList<>();
+        setupGame();
+    }
+
+    void setupGame() {
+        entities.clear(); // Clear the entity list
+        player = new Player(320, 240); // Make a new player in the center
+        entities.add(player); // The player is an entity
+    }
+
+    void keyPressed(int keyCode) {
+        getPlayer().keyPressed(keyCode);
+    }
+
+    Player getPlayer() {
+        return player;
+    }
+
+    // Draw
+    void draw() {
+        // Loop through all entities and run their logic.
+        for (int i = 0; i < entities.size(); i++) {
+            entities.get(i).update();
+        }
+        
+        // Draw a backdrop
+        background(0);
+
+        // Loop through all entities and draw them.
+        for (int i = 0; i < entities.size(); i++) {
+            entities.get(i).draw();
+        }
+    }
+}
+
+class Player extends Entity {
+    Player(int x, int y) {
+        super("player", x, y, 10, 10);
+
+        animation = "squish";
+    }
+    
+    void keyPressed(int keyCode) {
+        char key = (char) keyCode;
+        if (key == 'Z') {
+            jump();
+        }
+    }
+
+    void jump() {
+        print("jumped");
+    }
+    
+    void update() {
+
+    }
+    
+    void draw() {
+
+    }
+}
+
+class Entity {
+    int x, y, width, height;
+    double x_velocity, y_velocity;
+    boolean uses_gravity;
+    double gravity;
+    double max_gravity;
+    String id;
+    HashMap<String, ArrayList<PImage>> sprites = new HashMap<>();
+    String animation;
+
+    // Initialize variables
+    Entity(String id, int x, int y, int width, int height) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+
+        this.x_velocity = 0d;
+        this.y_velocity = 0d;
+
+        uses_gravity = false;
+
+        gravity = 0.6d;
+        max_gravity = 6d;
+
+        registerSprites();
+    }
+
+    void registerSprites() {
+        // Loop through the sprites directory
+        File dir = new File(sketchPath() + "/sprites/" + id + "/");
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            String name = files[i].getName();
+            String path = files[i].getAbsolutePath();
+            if (files[i].isFile()) {
+                ArrayList<PImage> images = new ArrayList<>();
+                images.add(loadImage(path));
+                sprites.put(name, images);
+                print(name);
+            } else {
+                ArrayList<PImage> images = new ArrayList<>();
+                for (int j = 0; j < files[i].listFiles().length; j++) {
+                    images.add(loadImage(files[i].listFiles()[j].getAbsolutePath()));
+                }
+                print(name);
+                sprites.put(name, images);
+            }
+        }
+    }
+
+    void enableGravity(boolean enable) {
+        uses_gravity = enable;
+    }
+
+    void setVelocity(double x, double y) {
+        x_velocity = x;
+        y_velocity = y;
+    }
+
+    void update() {
+        if (uses_gravity) {
+             if (y_velocity < max_gravity) {
+                 y_velocity += Double.min(gravity, max_gravity);
+             }
+        }
+    }
+
+    void draw() {
+        if ((animation != null) && (sprites.get(animation) != null)) {
+            image(sprites.get(animation).get(0), x, y);
+        }
+    }
+}

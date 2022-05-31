@@ -1,0 +1,439 @@
+import java.io.File;
+
+Game game;
+Input input;
+
+boolean DEBUG = true;
+boolean DEBUG_RENDER = false;
+
+PFont font;
+
+void setup() {
+  font = createFont("pcsenior.ttf", 16, false);
+  // Resize the screen to my favorite resolution
+  size(640, 480);
+  surface.setTitle("Platforming");
+  surface.setResizable(false);
+  frameRate(30);
+  game = new Game();
+  input = new Input();
+  loop();
+  noSmooth();
+}
+
+void draw() {
+  // Run logic
+  game.update();
+  // Draw
+  game.draw();
+  // Modify key states
+  input.changeKeys();
+}
+
+void keyPressed() {
+  input.keyPressed();
+}
+
+void keyReleased() {
+  input.keyReleased();
+}
+
+void mousePressed() {
+  input.mousePressed();
+}
+
+void mouseReleased() {
+  input.mouseReleased();
+}
+
+enum GameState {
+  MENU,
+    GAME,
+    PAUSED,
+    OPTIONS,
+    CREDITS,
+    TILE_PICKER
+}
+
+class Game {
+  ArrayList<Entity> entities;
+  Player player;
+  Map current_map;
+
+  // Dev stuff
+  int current_tile = 0;
+  int current_layer = 0;
+  int current_tool = 0;
+
+  GameState state = GameState.GAME;
+
+  Game() {
+    entities = new ArrayList<>();
+    setupGame();
+    current_map = loadMap("test");
+  }
+
+  void setupGame() {
+    entities.clear(); // Clear the entity list
+  }
+
+  Map loadMap(String name) {
+    entities.clear(); // Clear the entity list
+
+    player = new Player(320, 240); // Make a new player in the center
+    entities.add(player); // The player is an entity
+
+    // Load the map
+    Map map = new Map(name);
+
+    return map;
+  }
+
+  Player getPlayer() {
+    return player;
+  }
+
+  void update() {
+
+    int mouse_tile_x = (int) (mouseX / 32);
+    int mouse_tile_y = (int) (mouseY / 32);
+
+    switch (state) {
+    case MENU:
+      break;
+    case GAME:
+      // Loop through all entities and run their logic.
+      for (int i = 0; i < entities.size(); i++) {
+        entities.get(i).update();
+      }
+
+      if (DEBUG) {
+        if (input.pressed("S")) {
+          current_map.saveMap(current_map.name);
+        }
+        if (input.down("tab")) {
+          state = GameState.TILE_PICKER;
+          break;
+        }
+      } else {
+        if (input.mouseDown(0)) {
+          if (input.down("shift")) {
+            current_map.setCollisionTile(mouse_tile_x, mouse_tile_y, true);
+          } else {
+            current_map.setTile(current_layer, mouse_tile_x, mouse_tile_y, current_tile);
+          }
+        } else if (input.mouseDown(1)) {
+          if (input.down("shift")) {
+            current_map.setCollisionTile(mouse_tile_x, mouse_tile_y, false);
+          } else {
+            current_map.setTile(current_layer, mouse_tile_x, mouse_tile_y, 0);
+          }
+        } else if (input.mouseDown(2)) {
+          current_tile = current_map.getTile(current_layer, mouse_tile_x, mouse_tile_y);
+        }
+      }
+      if (input.pressed("1")) current_tool = 0;
+      if (input.pressed("2")) current_tool = 1;
+      if (input.pressed("3")) current_tool = 2;
+      if (input.pressed("4")) current_tool = 3;
+      if (input.pressed("5")) current_tool = 4;
+      if (input.pressed("6")) current_tool = 5;
+      if (input.pressed("7")) current_tool = 6;
+      if (input.pressed("8")) current_tool = 7;
+      if (input.pressed("9")) current_tool = 8;
+      if (input.pressed("0")) current_tool = 9;
+    }
+    break;
+  case PAUSED:
+    break;
+  case TILE_PICKER:
+    if (input.mousePressed(0)) {
+      // Get tile index based on mouse position
+      current_tile = mouse_tile_x + mouse_tile_y * current_map.tileset.horizontal_tiles;
+    }
+    if (input.released("tab")) {
+      state = GameState.GAME;
+    }
+    break;
+  }
+}
+
+
+// Draw
+void draw() {
+  // Draw a backdrop
+  background(0);
+
+  // Draw the map
+  current_map.draw();
+
+  // Loop through all entities and draw them.
+  for (int i = 0; i < entities.size(); i++) {
+    entities.get(i).draw();
+  }
+
+  if (DEBUG) {
+    Tileset tileset = current_map.tileset;
+    if (input.down("tab")) {
+      boolean alt = true;
+      // Draw all tiles in the tileset
+      for (int y = 0; y < tileset.vertical_tiles; y++) {
+        for (int x = 0; x < tileset.horizontal_tiles; x++) {
+          if (alt) {
+            fill(0, 230, 156);
+          } else {
+            fill(32, 180, 156);
+          }
+          noStroke();
+          rect(x * 32, y * 32, (x * 32) + 32 + 1, (y * 32) + 32 + 1);
+          var index = x + y * tileset.horizontal_tiles;
+          tileset.drawTile(x * 32, y * 32, index);
+
+          alt = !alt;
+        }
+        alt = !alt;
+      }
+    } else {
+      tileset.drawTile(16, 16, current_tile);
+      noFill();
+      strokeWeight(2);
+      stroke(230, 230, 230); // slightly gray is cool
+      rect(15, 15, 32 + 2, 32 + 2);
+    }
+
+    DEBUG_RENDER = false;
+    if (input.down("shift")) {
+      DEBUG_RENDER = true;
+      // Draw all collision tiles as red outlines
+      for (int y = 0; y < current_map.height; y++) {
+        for (int x = 0; x < current_map.width; x++) {
+          if (current_map.collision[y][x]) {
+            noFill();
+            stroke(255, 0, 0);
+            strokeWeight(2);
+            rect(x * 32, y * 32, 32, 32);
+          }
+        }
+      }
+    }
+  }
+
+  if (input.down("tab") || (current_tool == 0)) {
+    float draw_rect_x = (float) ((int) (mouseX / 32) * 32);
+    float draw_rect_y = (float) ((int) (mouseY / 32) * 32);
+    noFill();
+    stroke(230, 230, 230);
+    strokeWeight(2);
+    rect(draw_rect_x, draw_rect_y, 32, 32);
+  }
+
+  String tool_name = "";
+  switch (current_tool) {
+  case 0:
+    tool_name = "TILES";
+    break;
+  case 1:
+    tool_name = "COLLISION";
+    break;
+  case 2:
+    tool_name = "ENTITIES";
+    break;
+  case 3:
+    tool_name = "LIGHTING";
+    break;
+  case 4:
+    tool_name = "LAYERS";
+    break;
+  case 5:
+    tool_name = "MAP";
+    break;
+  case 6:
+    tool_name = "OBJECTS";
+    break;
+  case 7:
+    tool_name = "PLAYER";
+    break;
+  case 8:
+    tool_name = "TILESET";
+    break;
+  case 9:
+    tool_name = "TOOLS";
+    break;
+  }
+
+  fill(255);
+  outlineText("Current Tool: " + tool_name, 16 + 32 + 16, 32 + 8);
+}
+
+void outlineText(String text, float x, float y) {
+  int fillColor = g.fillColor;
+  textFont(font, 16);
+
+  fill(0, 0, 0);
+  text(text, x - 2, y    );
+  text(text, x + 2, y    );
+  text(text, x, y - 2);
+  text(text, x, y + 2);
+
+  fill(fillColor);
+  text(text, x, y);
+}
+}
+
+class Map {
+  int width, height;
+  ArrayList<int[][]> layers;
+  boolean[][] collision;
+  Tileset tileset;
+  String name;
+
+  Map(int width, int height, Tileset tileset) {
+    this.width = width;
+    this.height = height;
+    this.tileset = tileset;
+    this.name = "untitled";
+
+    collision = new boolean[height][width];
+
+    this.layers = new ArrayList<>();
+    layers.add(new int[height][width]);
+  }
+
+  Map(int width, int height, String tileset) {
+    this(width, height, new Tileset(tileset));
+  }
+
+  Map(String filename) {
+    this.name = filename;
+    JSONObject json = loadJSONObject("maps/" + filename + ".json");
+    this.width = json.getInt("width");
+    this.height = json.getInt("height");
+    JSONArray layers = json.getJSONArray("layers");
+    this.layers = new ArrayList<>();
+    for (int i = 0; i < layers.size(); i++) {
+      JSONArray layer = layers.getJSONArray(i);
+      int[][] layer_data = new int[height][width];
+      for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          layer_data[y][x] = layer.getJSONArray(y).getInt(x);
+        }
+      }
+      this.layers.add(layer_data);
+    }
+    this.tileset = new Tileset(json.getString("tileset"));
+    // Load collision
+    JSONArray collision_data = json.getJSONArray("collision");
+    this.collision = new boolean[height][width];
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        int data = collision_data.getJSONArray(y).getInt(x);
+        collision[y][x] = (data == 1); // Possibly support other collision types in the future
+      }
+    }
+  }
+
+  void saveMap(String name) {
+    // Save the map to a json file. For development only
+    println("[DEV] SAVING MAP " + name);
+    JSONObject map = new JSONObject();
+    map.setInt("width", width);
+    map.setInt("height", height);
+    JSONArray layers = new JSONArray();
+    for (int[][] layer : this.layers) {
+      JSONArray layer_data = new JSONArray();
+      for (int y = 0; y < height; y++) {
+        JSONArray row = new JSONArray();
+        for (int x = 0; x < width; x++) {
+          row.setInt(x, layer[y][x]);
+        }
+        layer_data.setJSONArray(y, row);
+      }
+      layers.setJSONArray(layers.size(), layer_data);
+    }
+    map.setJSONArray("layers", layers);
+    map.setString("tileset", tileset.name);
+    JSONArray collision_data = new JSONArray();
+    for (boolean[] row : collision) {
+      JSONArray row_data = new JSONArray();
+      for (boolean col : row) {
+        row_data.setInt(row_data.size(), col ? 1 : 0);
+      }
+      collision_data.setJSONArray(collision_data.size(), row_data);
+    }
+    map.setJSONArray("collision", collision_data);
+    saveJSONObject(map, "maps/" + name + ".json");
+  }
+
+  int getTile(int layer, int x, int y) {
+    return layers.get(layer)[y][x];
+  }
+
+  void setTile(int layer, int x, int y, int tile) {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      return;
+    }
+    layers.get(layer)[y][x] = tile;
+  }
+
+  void setCollisionTile(int x, int y, boolean tile) {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      return;
+    }
+    collision[y][x] = tile;
+  }
+
+  boolean isPosInSolid(double x, double y) {
+    return isSolid((int) (x / 32), (int) (y / 32));
+  }
+
+  boolean isSolid(int x, int y) {
+    // Check bounds
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      return false;
+    }
+    return collision[y][x];
+  }
+
+  void draw() {
+    for (int i = 0; i < layers.size(); i++) {
+      for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          int tile = layers.get(i)[y][x];
+          if (tile != 0) {
+            tileset.drawTile(x * 32, y * 32, tile);
+          }
+        }
+      }
+    }
+  }
+}
+
+class Tileset {
+  ArrayList<PImage> tiles;
+  int horizontal_tiles, vertical_tiles;
+  String name;
+  Tileset(String filename) {
+    name = filename;
+    PImage image = loadImage("tilesets/" + filename + ".png");
+    horizontal_tiles = image.width / 16;
+    vertical_tiles   = image.height / 16;
+
+    tiles = new ArrayList<>();
+
+    // Split the image into tiles
+    for (int y = 0; y < vertical_tiles; y++) {
+      for (int x = 0; x < horizontal_tiles; x++) {
+        tiles.add(image.get(x * 16, y * 16, 16, 16));
+      }
+    }
+  }
+
+  void drawTile(int x, int y, int tile) {
+    // Get the tile's position in the tileset using the tile's index
+
+    //int tile_x = tile % horizontal_tiles;
+    //int tile_y = tile / horizontal_tiles;
+
+    image(tiles.get(tile), x, y, 32, 32);
+  }
+}
