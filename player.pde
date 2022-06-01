@@ -106,6 +106,7 @@ class Player extends Entity {
 
         if (x + width > game.current_map.real_width) {
             if (!game.current_map.connected_right.equals("")) {
+                y += game.current_map.connected_right_offset * 32;
                 game.switchMap(game.current_map.connected_right);
             }
             x -= game.current_map.real_width;
@@ -113,6 +114,7 @@ class Player extends Entity {
 
         if (x + width < 0) {
             if (!game.current_map.connected_left.equals("")) {
+                y += game.current_map.connected_left_offset * 32;
                 game.switchMap(game.current_map.connected_left);
             }
             x += game.current_map.real_width;
@@ -120,6 +122,7 @@ class Player extends Entity {
 
         if (y + height > game.current_map.real_height) {
             if (!game.current_map.connected_down.equals("")) {
+                x += game.current_map.connected_down_offset * 32;
                 game.switchMap(game.current_map.connected_down);
             }
             y -= game.current_map.real_height;
@@ -127,6 +130,7 @@ class Player extends Entity {
 
         if (y + height < 0) {
             if (!game.current_map.connected_up.equals("")) {
+                x += game.current_map.connected_up_offset * 32;
                 game.switchMap(game.current_map.connected_up);
             }
             y += game.current_map.real_height;
@@ -138,6 +142,22 @@ class Player extends Entity {
         }
 
         updateAnimation();
+
+        // Check for collisions using AABB and getWidth/getHeight
+        for (Entity entity : game.entities) {
+            if (entity == this) continue;
+            double x = entity.x;
+            double y = entity.y;
+            double w = entity.getWidth();
+            double h = entity.getHeight();
+            // AABB
+            if (this.x < x + w && this.x + this.getWidth() > x && this.y < y + h && this.y + this.getHeight() > y) {
+                // Collision!
+                entity.onCollision(this);
+            }
+        }
+
+
     }
 
     void updateAnimation() {

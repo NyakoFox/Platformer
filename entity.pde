@@ -16,6 +16,8 @@ class Entity {
     double sprite_offset_y;
     boolean flipped;
     Map map;
+    EntityData data_reference;
+    boolean visible;
 
     // Initialize variables
     Entity(String id, double x, double y, double width, double height) {
@@ -35,6 +37,8 @@ class Entity {
 
         uses_gravity = false;
 
+        visible = true;
+
         // This started as 30 FPS, but I changed it to 60, so I had to change these too
         gravity = 1.2d / 4;
         max_gravity = 16d / 2;
@@ -49,6 +53,18 @@ class Entity {
         animation_speeds = new HashMap<>();
 
         registerSprites();
+    }
+
+    void onCollision(Entity other) {
+        // Override this
+    }
+
+    void save(JSONObject json) {
+        // By default, nothing extra needs to be saved.
+    }
+
+    void load(JSONObject json) {
+        // By default, nothing extra needs to be loaded.
     }
 
     void onAdd() {
