@@ -156,8 +156,6 @@ class Player extends Entity {
                 entity.onCollision(this);
             }
         }
-
-
     }
 
     void updateAnimation() {

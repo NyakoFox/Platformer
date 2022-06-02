@@ -1,6 +1,7 @@
 import java.io.File;
 import javax.swing.*;
 
+Registry registry;
 Game game;
 Input input;
 
@@ -9,18 +10,38 @@ boolean DEBUG_RENDER = false;
 
 PFont font;
 
+PShader shader_ripple;
+float ripple_timer;
+
+// NOTE: IF YOU RENAME THE PROJECT, THIS TYPE NEEDS TO BE RENAMED.
+// THIS IS HORRIBLE, BUT REQUIRED FOR THE SOUND LIBRARY
+platformer GLOBAL_MAIN_CLASS = this;
+
 void setup() {
     font = createFont("pcsenior.ttf", 16, false);
     // Resize the screen to my favorite resolution
-    size(640, 480);
+    size(640, 480, P2D);
     surface.setTitle("Platforming");
     surface.setResizable(false);
     frameRate(60);
+    registry = new Registry();
     game = new Game();
     input = new Input();
     loop();
     noSmooth();
     background(0);
+    ((PGraphicsOpenGL)g).textureSampling(2);
+
+    shader_ripple = loadShader("example.glsl");
+    shader_ripple.set("time", 0.0f);
+    shader_ripple.set("center", 0.5, 0.5);
+    shader_ripple.set("shockParams", 10f, 0.8f, 0.1f);
+    ripple_timer = -1f;
+}
+
+void doRippleEffect(double x, double y) {
+    ripple_timer = 0f;
+    shader_ripple.set("center", (float)(x / width), (float)(y / height));
 }
 
 void draw() {
@@ -30,6 +51,20 @@ void draw() {
     game.draw();
     // Modify key states
     input.changeKeys();
+
+    if (!(ripple_timer < 0f)) {
+        ripple_timer += 1f/60f;
+    }
+
+    if (ripple_timer > 2f) {
+        ripple_timer = -1f;
+    }
+
+    if ((ripple_timer > 0) && (ripple_timer < 2)) {
+      shader_ripple.set("time", ripple_timer);
+      shader_ripple.set("tex0", get());
+      filter(shader_ripple);
+    }
 }
 
 void keyPressed() {
@@ -553,7 +588,7 @@ class Game {
                         tool_name = "START";
                         // Draw the player's sprite at their spawn point
                         Player player = getPlayer();
-                        PImage sprite = player.sprites.get("idle").get(2);
+                        PImage sprite = registry.sprites.get("player").get("idle").get(2);
                         float draw_x = (float) (current_map.getStartX() + player.sprite_offset_x);
                         float draw_y = (float) (current_map.getStartY() + player.sprite_offset_y);
                         tint(255, 255, 255, 127);

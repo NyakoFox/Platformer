@@ -12,6 +12,8 @@ class Floppy extends Entity {
 
     void onCollision(Entity other) {
         if (!collected) {
+            doRippleEffect(x, y);
+            registry.playSound("collectible");
             collected = true;
             visible = false;
         }

@@ -6,7 +6,6 @@ class Entity {
     double gravity;
     double max_gravity;
     String id;
-    HashMap<String, ArrayList<PImage>> sprites;
     HashMap<String, Float> animation_speeds;
     String animation;
     double animation_timer;
@@ -49,10 +48,7 @@ class Entity {
 
         flipped = false;
 
-        sprites = new HashMap<>();
         animation_speeds = new HashMap<>();
-
-        registerSprites();
     }
 
     void onCollision(Entity other) {
@@ -105,28 +101,6 @@ class Entity {
         }
     }
 
-    void registerSprites() {
-        // Loop through the sprites directory
-        File dir = new File(sketchPath() + "/sprites/" + id + "/");
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            String name = files[i].getName();
-            String path = files[i].getAbsolutePath();
-            if (files[i].isFile()) {
-                name = name.substring(0, name.length() - 4);
-                ArrayList<PImage> images = new ArrayList<>();
-                images.add(loadImage(path));
-                sprites.put(name, images);
-            } else {
-                ArrayList<PImage> images = new ArrayList<>();
-                for (int j = 0; j < files[i].listFiles().length; j++) {
-                    images.add(loadImage(files[i].listFiles()[j].getAbsolutePath()));
-                }
-                sprites.put(name, images);
-            }
-        }
-    }
-
     void enableGravity(boolean enable) {
         uses_gravity = enable;
     }
@@ -145,12 +119,16 @@ class Entity {
 
     }
 
+    HashMap<String, ArrayList<PImage>> getSprites() {
+        return registry.sprites.get(id);
+    }
+
     void update() {
         animation_timer += animation_speed;
         while (animation_timer >= 1) {
             animation_timer -= 1;
             animation_index++;
-            if (animation_index >= sprites.get(animation).size()) {
+            if (animation_index >= getSprites().get(animation).size()) {
                 animationLooped(animation);
                 animation_index = 0;
             }
@@ -212,8 +190,8 @@ class Entity {
             rect((float) x, (float) y, (float) getWidth(), (float) getHeight());
         }
 
-        if ((animation != null) && (sprites.get(animation) != null)) {
-            var current_image = sprites.get(animation).get(animation_index);
+        if ((animation != null) && (getSprites().get(animation) != null)) {
+            var current_image = getSprites().get(animation).get(animation_index);
             var draw_x = x + sprite_offset_x;
             var draw_y = y + sprite_offset_y;
             if (flipped) {
