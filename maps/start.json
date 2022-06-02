@@ -3,7 +3,7 @@
   "connected_left_offset": 0,
   "connected_right": "start_2",
   "connected_down_offset": 0,
-  "connected_right_offset": 0,
+  "connected_right_offset": -3,
   "start_x": 260,
   "collision": [
     [
@@ -335,6 +335,50 @@
       1,
       1,
       1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
     ]
   ],
   "connected_left": "",
@@ -342,7 +386,10 @@
   "connected_down": "",
   "tileset": "indust",
   "entities": [{
-    "data": {"collected": false},
+    "data": {
+      "collected": false,
+      "uuid": "7e2d82fc-7864-4cbd-924a-a10cf59cbb6f"
+    },
     "name": "floppy",
     "x": 288,
     "y": 288
@@ -679,7 +726,51 @@
       5,
       3,
       1
+    ],
+    [
+      0,
+      23,
+      0,
+      24,
+      22,
+      0,
+      22,
+      0,
+      0,
+      22,
+      24,
+      0,
+      22,
+      0,
+      0,
+      22,
+      0,
+      0,
+      24,
+      22
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      23,
+      0,
+      0,
+      0,
+      0,
+      24,
+      0,
+      0,
+      0,
+      0,
+      0
     ]
   ]],
-  "height": 15
+  "height": 17
 }

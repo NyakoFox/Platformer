@@ -225,6 +225,89 @@ class Map {
         return collision[y][x];
     }
 
+    void shiftTiles(int x, int y) {
+        // Shift all tile positions by x and y
+        // Make new layers and copy the data
+        ArrayList<int[][]> new_layers = new ArrayList<>();
+        for (int[][] layer : layers) {
+            int[][] new_layer = new int[height][width];
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    int new_x = j - x;
+                    int new_y = i - y;
+                    if (new_x < 0 || new_x >= width || new_y < 0 || new_y >= height) {
+                        // If the new position is out of bounds, then continue
+                        continue;
+                    } else {
+                        new_layer[i][j] = layer[new_y][new_x];
+                    }
+                }
+            }
+            new_layers.add(new_layer);
+        }
+        layers = new_layers;
+
+        // Shift the collision data
+        boolean[][] new_collision = new boolean[height][width];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                int new_x = j - x;
+                int new_y = i - y;
+                if (new_x < 0 || new_x >= width || new_y < 0 || new_y >= height) {
+                    // If the new position is out of bounds, then continue
+                    continue;
+                } else {
+                    new_collision[i][j] = collision[new_y][new_x];
+                }
+            }
+        }
+        collision = new_collision;
+
+        // And entities
+        for (EntityData data : entities) {
+            data.x += x * 32;
+            data.y += y * 32;
+        }
+        // And any current game entities
+        for (Entity entity : game.entities) {
+            entity.x += x * 32;
+            entity.y += y * 32;
+        }
+    }
+
+    void resize(int new_width, int new_height) {
+        // Resize the map, adding empty space
+        // Layers are an ArrayList
+        ArrayList<int[][]> new_layers = new ArrayList<>();
+        for (int[][] layer : layers) {
+            int[][] new_layer = new int[new_height][new_width];
+            for (int y = 0; y < new_height; y++) {
+                for (int x = 0; x < new_width; x++) {
+                    if (y < height && x < width) {
+                        new_layer[y][x] = layer[y][x];
+                    }
+                }
+            }
+            new_layers.add(new_layer);
+        }
+        layers = new_layers;
+        // Resize the collision array
+        boolean[][] new_collision = new boolean[new_height][new_width];
+        for (int y = 0; y < new_height; y++) {
+            for (int x = 0; x < new_width; x++) {
+                if (y < height && x < width) {
+                    new_collision[y][x] = collision[y][x];
+                }
+            }
+        }
+        collision = new_collision;
+        // Resize the map
+        width = new_width;
+        height = new_height;
+        real_width = width * 32;
+        real_height = height * 32;
+    }
+
     void draw() {
         for (int i = 0; i < layers.size(); i++) {
             for (int y = 0; y < height; y++) {

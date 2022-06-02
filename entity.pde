@@ -1,3 +1,5 @@
+import java.util.UUID;
+
 class Entity {
     double x, y, width, height;
     double x_velocity, y_velocity;
@@ -18,9 +20,12 @@ class Entity {
     EntityData data_reference;
     boolean visible;
 
+    String uuid;
+
     // Initialize variables
     Entity(String id, double x, double y, double width, double height) {
         this.id = id;
+        this.uuid = UUID.randomUUID().toString();
         this.x = x;
         this.y = y;
         this.width = width;
@@ -51,16 +56,36 @@ class Entity {
         animation_speeds = new HashMap<>();
     }
 
+    public void setFlag(String key, String  value) { flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, Boolean value) { flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, Integer value) { flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, Float   value) { flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, Double  value) { flags.set(uuid + "/" + key, value); }
+
+    public String  getFlagString (String key) { return flags.getString (uuid + "/" + key); }
+    public Boolean getFlagBoolean(String key) { return flags.getBoolean(uuid + "/" + key); }
+    public Integer getFlagInteger(String key) { return flags.getInteger(uuid + "/" + key); }
+    public Float   getFlagFloat  (String key) { return flags.getFloat  (uuid + "/" + key); }
+    public Double  getFlagDouble (String key) { return flags.getDouble (uuid + "/" + key); }
+
+    public String  getFlagString (String key, String  defaultValue) { return flags.getString (uuid + "/" + key, defaultValue); }
+    public Boolean getFlagBoolean(String key, Boolean defaultValue) { return flags.getBoolean(uuid + "/" + key, defaultValue); }
+    public Integer getFlagInteger(String key, Integer defaultValue) { return flags.getInteger(uuid + "/" + key, defaultValue); }
+    public Float   getFlagFloat  (String key, Float   defaultValue) { return flags.getFloat  (uuid + "/" + key, defaultValue); }
+    public Double  getFlagDouble (String key, Double  defaultValue) { return flags.getDouble (uuid + "/" + key, defaultValue); }
+
     void onCollision(Entity other) {
         // Override this
     }
 
     void save(JSONObject json) {
-        // By default, nothing extra needs to be saved.
+        // By default, write UUID
+        json.put("uuid", uuid);
     }
 
     void load(JSONObject json) {
-        // By default, nothing extra needs to be loaded.
+        // By default, load UUID
+        uuid = json.getString("uuid");
     }
 
     void onAdd() {
@@ -178,9 +203,14 @@ class Entity {
     }
 
     boolean onGround() {
-        // TODO: this is bad and sometimes goes off when it shouldn't
-        return isInSolid(x, y + getHeight() + 1);
+        // Check if we're on the ground, taking into account velocity.
+        if (y_velocity > 0) return false;
+        return isInSolid(x, (int) (y + getHeight()));
+
     }
+
+        // TODO: this is bad and sometimes goes off when it shouldn't
+        //return isInSolid(x, y + getHeight() + 1);
 
     double getDrawX() {
         return x + sprite_offset_x;

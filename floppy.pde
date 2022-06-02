@@ -12,7 +12,10 @@ class Floppy extends Entity {
 
     void onCollision(Entity other) {
         if (!collected) {
+            setFlag("collected", true);
             doRippleEffect(x, y);
+            floppy_timer = 0;
+            flags.set("floppies", flags.getInteger("floppies", 0) + 1);
             registry.playSound("collectible");
             collected = true;
             visible = false;
@@ -20,13 +23,23 @@ class Floppy extends Entity {
     }
 
     void save(JSONObject json) {
+        // Save data to the map (for the hacky editor)
         json.setBoolean("collected", collected);
         super.save(json);
     }
 
     void load(JSONObject json) {
+        // Load data from the map
         collected = json.getBoolean("collected");
         super.load(json);
+    }
+
+    void onAdd() {
+        // When added to the world (UUID should be set at this point)
+        if (getFlagBoolean("collected") || collected) {
+            collected = true;
+            visible = false;
+        }
     }
 
     void update() {

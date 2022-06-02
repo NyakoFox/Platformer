@@ -49,6 +49,7 @@ class Player extends Entity {
     }
 
     void jump() {
+        registry.playSound("jump");
         addVelocity(0, -8);
         if ((y_velocity < -8) && coyote_time > 0) {
             y_velocity = -8;
