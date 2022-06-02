@@ -182,6 +182,18 @@ class Entity {
         return isInSolid(x, y + getHeight() + 1);
     }
 
+    double getDrawX() {
+        return x + sprite_offset_x;
+    }
+
+    double getDrawY() {
+        return y + sprite_offset_y;
+    }
+
+    PImage getCurrentImage() {
+        return getSprites().get(animation).get(animation_index);
+    }
+
     void draw() {
         // Draw debug rectangle of width and height
         if (DEBUG_RENDER) {
@@ -191,9 +203,9 @@ class Entity {
         }
 
         if ((animation != null) && (getSprites().get(animation) != null)) {
-            var current_image = getSprites().get(animation).get(animation_index);
-            var draw_x = x + sprite_offset_x;
-            var draw_y = y + sprite_offset_y;
+            var current_image = getCurrentImage();
+            var draw_x = getDrawX();
+            var draw_y = getDrawY();
             if (flipped) {
                 pushMatrix();
                 translate((float) (draw_x + (current_image.width * x_scale)), (float) draw_y);

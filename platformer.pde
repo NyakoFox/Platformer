@@ -32,7 +32,7 @@ void setup() {
     background(0);
     ((PGraphicsOpenGL)g).textureSampling(2);
 
-    shader_ripple = loadShader("example.glsl");
+    shader_ripple = loadShader("ripple.glsl");
     shader_ripple.set("time", 0.0f);
     shader_ripple.set("center", 0.5, 0.5);
     shader_ripple.set("shockParams", 10f, 0.8f, 0.1f);
@@ -45,6 +45,17 @@ void doRippleEffect(double x, double y) {
 }
 
 void draw() {
+
+    if (!(ripple_timer < 0f)) {
+        ripple_timer += 1f/60f;
+    }
+
+    if (ripple_timer > 1.5f) {
+        ripple_timer = -1f;
+    }
+
+    boolean ripple_active = (ripple_timer > 0) && (ripple_timer < 1.5);
+
     // Run logic
     game.update();
     // Draw
@@ -52,18 +63,12 @@ void draw() {
     // Modify key states
     input.changeKeys();
 
-    if (!(ripple_timer < 0f)) {
-        ripple_timer += 1f/60f;
-    }
-
-    if (ripple_timer > 2f) {
-        ripple_timer = -1f;
-    }
-
-    if ((ripple_timer > 0) && (ripple_timer < 2)) {
-      shader_ripple.set("time", ripple_timer);
-      shader_ripple.set("tex0", get());
-      filter(shader_ripple);
+    if (ripple_active) {
+        // WE DON'T WANT TO SHOW THE SHADER WHEN IT'S NOT NEEDED.
+        // IT'S EXTREMELY SLOW.
+        shader_ripple.set("time", ripple_timer);
+        shader_ripple.set("tex0", get());
+        filter(shader_ripple);
     }
 }
 

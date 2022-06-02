@@ -32,4 +32,12 @@ class Floppy extends Entity {
     void update() {
         super.update();
     }
+
+    void draw() {
+        super.draw();
+        //var current_image = getCurrentImage();
+        //var draw_x = getDrawX();
+        //var draw_y = getDrawY();
+        //image(current_image, (float) draw_x, (float) draw_y, (float) (current_image.width * x_scale), (float) (current_image.height * y_scale));
+    }
 }
