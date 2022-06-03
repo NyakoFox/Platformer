@@ -54,6 +54,8 @@ class Entity {
         flipped = false;
 
         animation_speeds = new HashMap<>();
+
+        animation = null;
     }
 
     public void setFlag(String key, String  value) { flags.set(uuid + "/" + key, value); }
@@ -149,13 +151,15 @@ class Entity {
     }
 
     void update() {
-        animation_timer += animation_speed;
-        while (animation_timer >= 1) {
-            animation_timer -= 1;
-            animation_index++;
-            if (animation_index >= getSprites().get(animation).size()) {
-                animationLooped(animation);
-                animation_index = 0;
+        if (animation != null) {
+            animation_timer += animation_speed;
+            while (animation_timer >= 1) {
+                animation_timer -= 1;
+                animation_index++;
+                if (animation_index >= getSprites().get(animation).size()) {
+                    animationLooped(animation);
+                    animation_index = 0;
+                }
             }
         }
 
