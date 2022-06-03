@@ -607,7 +607,7 @@ class Game {
                     if (input.pressed("0")) setTool(9);
 
                     if (input.pressed("T")) setSubtool(0);
-                    if (input.pressed("Y")) setSubtool(1);;
+                    if (input.pressed("Y")) setSubtool(1);
                 }
                 break;
             case PAUSED:

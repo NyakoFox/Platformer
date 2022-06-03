@@ -1,3 +1,5 @@
+import java.util.Random;
+
 class Player extends Entity {
 
     double walking_speed = 5;
@@ -49,7 +51,10 @@ class Player extends Entity {
     }
 
     void jump() {
-        registry.playSound("jump");
+        float min = 0.95;
+        float max = 1.05;
+        float random = min + (new Random()).nextFloat() * (max - min);
+        registry.playSound("jump", 1, random);
         addVelocity(0, -8);
         if ((y_velocity < -8) && coyote_time > 0) {
             y_velocity = -8;

@@ -32,6 +32,12 @@ class Registry {
         sounds.get(name).play();
     }
 
+    void playSound(String name, float volume, float pitch) {
+        sounds.get(name).play();
+        sounds.get(name).amp(volume);
+        sounds.get(name).rate(pitch);
+    }
+
     void registerSounds() {
         // Loop through the sounds directory
         File soundsDir = new File(sketchPath() + "/sounds/");
