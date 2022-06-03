@@ -257,7 +257,7 @@
       0,
       0,
       0,
-      1,
+      0,
       0,
       0,
       0,
@@ -385,15 +385,7 @@
   "connected_up": "",
   "connected_down": "",
   "tileset": "indust",
-  "entities": [{
-    "data": {
-      "collected": false,
-      "uuid": "7e2d82fc-7864-4cbd-924a-a10cf59cbb6f"
-    },
-    "name": "floppy",
-    "x": 288,
-    "y": 288
-  }],
+  "entities": [],
   "start_y": 426,
   "width": 20,
   "layers": [[

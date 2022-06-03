@@ -33,7 +33,8 @@ platformer GLOBAL_MAIN_CLASS = this;
 
 void setup() {
     font = createFont("pcsenior.ttf", 16, false);
-    // Resize the screen to my favorite resolution
+    // Resize the screen to my favorite resolution (640x480)
+    // Also set the renderer to P2D so I can use shaders
     size(640, 480, P2D);
     surface.setTitle("Platforming");
     surface.setResizable(false);
@@ -45,24 +46,29 @@ void setup() {
     loop();
     noSmooth();
     background(0);
+    // Since we're using P2D, we need to set the texture sampling to POINT which is 2
+    // Just so everything isn't blurry
+    // It defaults to 5 which is trilinear which makes the game look really bad
     ((PGraphicsOpenGL)g).textureSampling(2);
 
+    // Shader setup for the ripple effect
     shader_ripple = loadShader("ripple.glsl");
     shader_ripple.set("time", 0.0f);
     shader_ripple.set("center", 0.5, 0.5);
     shader_ripple.set("shockParams", 10f, 0.8f, 0.1f);
-    ripple_timer = -1f;
 
+    // Ripple effect state variables
+    ripple_timer = -1f;
     floppy_x = 0f;
     floppy_y = 0f;
     floppy_bounce = 0f;
-
     floppy_timer = -1;
 }
 
 void doRippleEffect(double x, double y) {
+    // The ripple effect is active as long as the timer isn't -1
     ripple_timer = 0f;
-    shader_ripple.set("center", (float)(x / width), (float)(y / height));
+    shader_ripple.set("center", (float)((x - camera_left) / width), (float)((y - camera_top) / height));
 }
 
 void draw() {
@@ -180,8 +186,11 @@ class Game {
             double y = entity.y;
             double w = entity.getWidth();
             double h = entity.getHeight();
+
+            double mouse_x = mouseX + camera_left;
+            double mouse_y = mouseY + camera_top;
             // AABB
-            if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
+            if (mouse_x + camera_left >= x && mouse_x <= x + w && mouse_y >= y && mouse_y <= y + h) {
                 return entity;
             }
         }
