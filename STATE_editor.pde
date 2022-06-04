@@ -67,8 +67,8 @@ class EditorState {
     }
 
     Map loadMap(String name) {
-        // Load the map
-        return new Map(name);
+        // Fetch the map from the registry
+        return Registry.MAPS.get(name);
     }
 
     void unloadMap() {
@@ -301,6 +301,7 @@ class EditorState {
                     Input.clearPressed();
                     if (current_map.connected_left != "") {
                         switchMap(current_map.connected_left);
+                        camera_y = current_map.real_height - 240;
                     }
                     return;
                 }
@@ -308,6 +309,7 @@ class EditorState {
                     Input.clearPressed();
                     if (current_map.connected_right != "") {
                         switchMap(current_map.connected_right);
+                        camera_y = current_map.real_height - 240;
                     }
                     return;
                 }
@@ -315,6 +317,7 @@ class EditorState {
                     Input.clearPressed();
                     if (current_map.connected_up != "") {
                         switchMap(current_map.connected_up);
+                        camera_y = current_map.real_height - 240;
                     }
                     return;
                 }
@@ -322,6 +325,7 @@ class EditorState {
                     Input.clearPressed();
                     if (current_map.connected_down != "") {
                         switchMap(current_map.connected_down);
+                        camera_y = current_map.real_height - 240;
                     }
                     return;
                 }
@@ -357,6 +361,7 @@ class EditorState {
                     if (new_name != null) {
                         Map new_map = new Map(20, 15, "indust");
                         new_map.name = new_name;
+                        Registry.MAPS.put(new_name, new_map);
                         new_map.saveMap(new_name);
                         switchMap(new_name);
                     }
@@ -619,12 +624,12 @@ class EditorState {
                     case 9:
                         tool_name = "START";
                         // Draw the player's sprite at their spawn point
-                        int player_sprite_offset_x = 4;
-                        int player_sprite_offset_y = 4;
+                        int player_sprite_offset_x = -4;
+                        int player_sprite_offset_y = -10;
 
                         PImage sprite = Registry.SPRITES.get("player").get("idle").get(2);
-                        float draw_x = (float) (current_map.getStartX() + player_sprite_offset_x);
-                        float draw_y = (float) (current_map.getStartY() + player_sprite_offset_y);
+                        float draw_x = (float) (current_map.getStartX() + player_sprite_offset_x - camera_left);
+                        float draw_y = (float) (current_map.getStartY() + player_sprite_offset_y - camera_top);
                         tint(255, 255, 255, 127);
                         image(sprite, draw_x, draw_y, (float) (sprite.width * 2), (float) (sprite.height * 2));
 

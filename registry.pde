@@ -3,6 +3,7 @@ import processing.sound.*;
 public static class Registry {
     public static HashMap<String, HashMap<String, ArrayList<PImage>>> SPRITES = new HashMap<>();
     public static HashMap<String, SoundFile> SOUNDS = new HashMap<>();
+    public static HashMap<String, Map> MAPS = new HashMap<>();
     public static String SKETCH_PATH = "";
     public static platformer MAIN;
 
@@ -11,6 +12,7 @@ public static class Registry {
         SKETCH_PATH = path;
         registerSprites();
         registerSounds();
+        registerMaps();
     }
 
     public static void playSound(String name) {
@@ -69,5 +71,20 @@ public static class Registry {
             }
         }
         SPRITES.put(sprite_name, loaded_sprites);
+    }
+
+    public static void registerMaps() {
+        // Loop through the maps directory and load all of them
+        File dir = new File(SKETCH_PATH + "/maps/");
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                String file_name = child.getName();
+                String map_name = file_name.substring(0, file_name.length() - 5);
+                Map map = MAIN.new Map(map_name);
+                MAPS.put(map_name, map);
+                println("[REGISTRY] Registered map " + map_name);
+            }
+        }
     }
 }

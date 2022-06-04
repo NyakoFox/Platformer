@@ -54,11 +54,13 @@ void enterPlaytesting() {
     // Don't remove STATE_EDITOR, we'll go back to it later
     STATE_GAMEPLAY = new GameplayState();
     STATE = GameStates.GAMEPLAY;
-    STATE_GAMEPLAY.enter();
+    STATE_GAMEPLAY.enterPlaytesting(STATE_EDITOR.current_map.name);
 }
 
 void exitPlaytesting() {
+    // Clean up playtesting
     STATE_GAMEPLAY = null;
+    // And go back to the (still active) editor
     STATE = GameStates.EDITOR;
 }
 
@@ -73,7 +75,7 @@ void enterState(GameStates new_state) {
             break;
         case GAMEPLAY:
             STATE_GAMEPLAY = new GameplayState();
-            STATE_GAMEPLAY.enter();
+            STATE_GAMEPLAY.enter("start");
             break;
         case EDITOR:
             STATE_EDITOR = new EditorState();

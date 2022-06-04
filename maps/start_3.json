@@ -4,7 +4,7 @@
   "connected_right": "",
   "connected_down_offset": 0,
   "connected_right_offset": 0,
-  "start_x": 320,
+  "start_x": 164,
   "collision": [
     [
       0,
@@ -467,7 +467,7 @@
       "uuid": "8c658550-628e-494b-a7c0-f83801c5bca2"
     }
   ],
-  "start_y": 240,
+  "start_y": 490,
   "width": 20,
   "layers": [[
     [

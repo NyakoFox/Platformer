@@ -57,6 +57,13 @@ class GameplayState {
         player.onInitialAdd();
     }
 
+    void enterPlaytesting(String map) {
+        enter(map);
+        playtesting = true;
+        // Update is already done at this point so we need to do it manually
+        updateCamera();
+    }
+
     void doRippleEffect(double x, double y) {
         // The ripple effect is active as long as the timer isn't -1
         ripple_timer = 0f;
@@ -90,9 +97,7 @@ class GameplayState {
         entities.clear(); // Clear the entity list
 
         // Load the map
-        Map map = new Map(name);
-
-        return map;
+        return Registry.MAPS.get(name);
     }
 
     void unloadMap() {
@@ -148,6 +153,12 @@ class GameplayState {
 
         if (Input.pressed("R")) {
             player.gotoCheckpoint();
+            updateCamera();
+            return;
+        }
+
+        if (Input.pressed("enter")) {
+            MAIN.exitPlaytesting();
             return;
         }
 

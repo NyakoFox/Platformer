@@ -175,7 +175,6 @@ class Map {
         map.setJSONArray("entities", entities);
 
         saveJSONObject(map, "maps/" + name + ".json");
-
     }
 
     int getTile(int layer, int x, int y) {
