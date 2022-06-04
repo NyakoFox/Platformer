@@ -385,13 +385,7 @@
   "connected_up": "",
   "connected_down": "",
   "tileset": "indust",
-  "entities": [{
-    "data": {},
-    "name": "floppy",
-    "x": 288,
-    "y": 320,
-    "uuid": "c7a251cd-ad21-4d38-b607-8033cc44f05a"
-  }],
+  "entities": [],
   "start_y": 426,
   "width": 20,
   "layers": [[

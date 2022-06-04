@@ -451,22 +451,7 @@
   "connected_up": "",
   "connected_down": "",
   "tileset": "indust",
-  "entities": [
-    {
-      "data": {},
-      "name": "floppy",
-      "x": 384,
-      "y": 192,
-      "uuid": "bb4ea855-68cb-49e2-afdc-8308c4d916da"
-    },
-    {
-      "data": {},
-      "name": "floppy",
-      "x": 224,
-      "y": 448,
-      "uuid": "8c658550-628e-494b-a7c0-f83801c5bca2"
-    }
-  ],
+  "entities": [],
   "start_y": 490,
   "width": 20,
   "layers": [[

@@ -12,8 +12,8 @@ class FloppyMapEntity extends MapEntity {
     }
 
     void draw() {
-        fill(255, 0, 0);
-        GRAPHICS.outlineText("FLOPPY", (float)x, (float)y);
         super.draw();
+        ArrayList<PImage> sprites = Registry.SPRITES.get("floppy").get("idle");
+        image(sprites.get((frameCount / 8) % sprites.size()), (float)x, (float)y, 32, 32);
     }
 }

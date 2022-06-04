@@ -58,10 +58,13 @@ void enterPlaytesting() {
 }
 
 void exitPlaytesting() {
-    // Clean up playtesting
-    STATE_GAMEPLAY = null;
-    // And go back to the (still active) editor
+    // Go back to the (still active) editor
     STATE = GameStates.EDITOR;
+    STATE_EDITOR.switchMap(STATE_GAMEPLAY.current_map.name);
+    STATE_EDITOR.camera_x = STATE_GAMEPLAY.camera_x;
+    STATE_EDITOR.camera_y = STATE_GAMEPLAY.camera_y;
+    // And clean up the gameplay state
+    STATE_GAMEPLAY = null;
 }
 
 void enterState(GameStates new_state) {
