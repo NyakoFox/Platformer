@@ -1,11 +1,3 @@
-
-class EntityData {
-    String name;
-    double x;
-    double y;
-    JSONObject data;
-}
-
 class Map {
     int width, height;
     int real_width, real_height;
@@ -23,7 +15,7 @@ class Map {
     int connected_right_offset;
     int connected_up_offset;
     int connected_down_offset;
-    ArrayList<EntityData> entities;
+    ArrayList<MapEntity> entities;
 
     Map(int width, int height, Tileset tileset) {
         this.width = width;
@@ -99,33 +91,25 @@ class Map {
         this.entities = new ArrayList<>();
         if (entities != null) {
             for (int i = 0; i < entities.size(); i++) {
-                JSONObject entity = entities.getJSONObject(i);
-                EntityData data = new EntityData();
-                data.name = entity.getString("name");
-                data.x = entity.getDouble("x");
-                data.y = entity.getDouble("y");
-                data.data = entity.getJSONObject("data");
-                this.entities.add(data);
+                JSONObject entity_json = entities.getJSONObject(i);
+                MapEntity map_entity = createEntityFromName(entity_json.getString("name"));
+                map_entity.name = entity_json.getString("name");
+                map_entity.x = entity_json.getDouble("x");
+                map_entity.y = entity_json.getDouble("y");
+                map_entity.uuid = entity_json.getString("uuid");
+                map_entity.load(entity_json.getJSONObject("data"));
+                this.entities.add(map_entity);
             }
         }
     }
 
-    void addEntityData(EntityData data) {
-        entities.add(data);
-    }
-
-    EntityData addEntityData(Entity entity) {
-        EntityData data = new EntityData();
-        data.name = entity.id;
-        data.x = entity.x;
-        data.y = entity.y;
-        // Make a new JSON object
-        JSONObject entity_data = new JSONObject();
-        // Call the serialize function on the entity
-        entity.save(entity_data);
-        data.data = entity_data;
-        addEntityData(data);
-        return data;
+    MapEntity createEntityFromName(String name) {
+        switch (name) {
+            case "floppy":
+                return new FloppyMapEntity();
+            default:
+                return new ErrorMapEntity();
+        }
     }
 
     double getStartX() {
@@ -178,14 +162,16 @@ class Map {
 
         // Save entity data
         JSONArray entities = new JSONArray();
-        for (EntityData data : this.entities) {
-            JSONObject entity = new JSONObject();
-            entity.setString("name", data.name);
-            entity.setDouble("x", data.x);
-            entity.setDouble("y", data.y);
-            entity.setJSONObject("data", data.data);
-            entities.setJSONObject(entities.size(), entity);
+        for (MapEntity entity : this.entities) {
+            JSONObject json_entity = new JSONObject();
+            json_entity.setString("name", entity.name);
+            json_entity.setDouble("x", entity.x);
+            json_entity.setDouble("y", entity.y);
+            json_entity.setString("uuid", entity.uuid);
+            json_entity.setJSONObject("data", entity.save(new JSONObject()));
+            entities.setJSONObject(entities.size(), json_entity);
         }
+
         map.setJSONArray("entities", entities);
 
         saveJSONObject(map, "maps/" + name + ".json");
@@ -264,12 +250,7 @@ class Map {
         collision = new_collision;
 
         // And entities
-        for (EntityData data : entities) {
-            data.x += x * 32;
-            data.y += y * 32;
-        }
-        // And any current game entities
-        for (Entity entity : game.entities) {
+        for (MapEntity entity : entities) {
             entity.x += x * 32;
             entity.y += y * 32;
         }

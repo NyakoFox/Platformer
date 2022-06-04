@@ -13,7 +13,7 @@ It's explained in-game, but the basics are:
 Other mechanics are explained in-game, so pay attention to those!
 
 # Modding
-It's possible to make custom levels if you want to deal with my weird editor system. Open up `game.pde` and set `DEBUG` to `true`. You can ignore `DEBUG_RENDER` since that automatically gets set in some places.
+It's possible to make custom levels if you want to deal with my weird editor system. Open up `platformer.pde` and set `DEBUG` to `true`. You can ignore `DEBUG_RENDER` since that automatically gets set in some places.
 
 ## Tools
 You can use the number keys to switch tools. You can use Y to go to subtool 1, and U to go to subtool 2. Weird, I know.
@@ -97,12 +97,12 @@ And for some functions...
 ### Input
 This is pretty simple.
 
-* `input.down(String key)` - Check if this key is being pressed down.
-* `input.pressed(String key)` - Check if this key was just pressed.
-* `input.released(String key)` - Check if this key was just released.
-* `input.up(String key)` - Check if this key is not being held down.
-* `input.mouseDown/mousePressed/mouseReleased/mouseUp(int button)` - Ditto. `0` is the left button, `1` is the right button, and `2` is the middle button.
-* `clearPressed()` - Unpress all keys. This does not trigger `input.released`.
+* `Input.down(String key)` - Check if this key is being pressed down.
+* `Input.pressed(String key)` - Check if this key was just pressed.
+* `Input.released(String key)` - Check if this key was just released.
+* `Input.up(String key)` - Check if this key is not being held down.
+* `Input.mouseDown/mousePressed/mouseReleased/mouseUp(int button)` - Ditto. `0` is the left button, `1` is the right button, and `2` is the middle button.
+* `clearPressed()` - Unpress all keys. This does not trigger `Input.released`.
 
 Everything else is for internal use only.
 

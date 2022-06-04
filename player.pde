@@ -47,14 +47,14 @@ class Player extends Entity {
         y = checkpoint_y;
         x_velocity = 0;
         y_velocity = 0;
-        game.switchMap(checkpoint_map);
+        MAIN.STATE_GAMEPLAY.switchMap(checkpoint_map);
     }
 
     void jump() {
         float min = 0.95;
         float max = 1.05;
         float random = min + (new Random()).nextFloat() * (max - min);
-        registry.playSound("jump", 1, random);
+        Registry.playSound("jump", 1, random);
         addVelocity(0, -8);
         if ((y_velocity < -8) && coyote_time > 0) {
             y_velocity = -8;
@@ -67,7 +67,7 @@ class Player extends Entity {
         if (onGround()) coyote_time = 6;
 
         if (coyote_time > 0) coyote_time--;
-        if (input.pressed("Z")) {
+        if (Input.pressed("Z")) {
             if (coyote_time > 0) {
                 jump();
             }
@@ -75,7 +75,7 @@ class Player extends Entity {
 
         double horizontal_speed_cap = walking_speed;
 
-        if (input.down("left")) {
+        if (Input.down("left")) {
             if (onGround()) flipped = true;
 		    // If you're holding left, and you're not already at max walking speed...
 		    if ((x_velocity) > -horizontal_speed_cap) {
@@ -91,7 +91,7 @@ class Player extends Entity {
     		}
     	}
 
-    	if (input.down("right")) {
+    	if (Input.down("right")) {
             if (onGround()) flipped = false;
     		// If you're holding right, and you're not already at max walking speed...
     		if ((x_velocity) < horizontal_speed_cap) {
@@ -110,36 +110,36 @@ class Player extends Entity {
         boolean wasOnGround = onGround();
         super.update();
 
-        if (x + width > game.current_map.real_width) {
-            if (!game.current_map.connected_right.equals("")) {
-                y += game.current_map.connected_right_offset * 32;
-                game.switchMap(game.current_map.connected_right);
+        if (x + width > MAIN.STATE_GAMEPLAY.current_map.real_width) {
+            if (!MAIN.STATE_GAMEPLAY.current_map.connected_right.equals("")) {
+                y += MAIN.STATE_GAMEPLAY.current_map.connected_right_offset * 32;
+                MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_right);
             }
-            x -= game.current_map.real_width;
+            x -= MAIN.STATE_GAMEPLAY.current_map.real_width;
         }
 
         if (x + width < 0) {
-            if (!game.current_map.connected_left.equals("")) {
-                y += game.current_map.connected_left_offset * 32;
-                game.switchMap(game.current_map.connected_left);
+            if (!MAIN.STATE_GAMEPLAY.current_map.connected_left.equals("")) {
+                y += MAIN.STATE_GAMEPLAY.current_map.connected_left_offset * 32;
+                MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_left);
             }
-            x += game.current_map.real_width;
+            x += MAIN.STATE_GAMEPLAY.current_map.real_width;
         }
 
-        if (y + height > game.current_map.real_height) {
-            if (!game.current_map.connected_down.equals("")) {
-                x += game.current_map.connected_down_offset * 32;
-                game.switchMap(game.current_map.connected_down);
+        if (y + height > MAIN.STATE_GAMEPLAY.current_map.real_height) {
+            if (!MAIN.STATE_GAMEPLAY.current_map.connected_down.equals("")) {
+                x += MAIN.STATE_GAMEPLAY.current_map.connected_down_offset * 32;
+                MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_down);
             }
-            y -= game.current_map.real_height;
+            y -= MAIN.STATE_GAMEPLAY.current_map.real_height;
         }
 
         if (y + height < 0) {
-            if (!game.current_map.connected_up.equals("")) {
-                x += game.current_map.connected_up_offset * 32;
-                game.switchMap(game.current_map.connected_up);
+            if (!MAIN.STATE_GAMEPLAY.current_map.connected_up.equals("")) {
+                x += MAIN.STATE_GAMEPLAY.current_map.connected_up_offset * 32;
+                MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_up);
             }
-            y += game.current_map.real_height;
+            y += MAIN.STATE_GAMEPLAY.current_map.real_height;
         }
 
         if (!wasOnGround && onGround()) {
@@ -150,7 +150,7 @@ class Player extends Entity {
         updateAnimation();
 
         // Check for collisions using AABB and getWidth/getHeight
-        for (Entity entity : game.entities) {
+        for (Entity entity : MAIN.STATE_GAMEPLAY.entities) {
             if (entity == this) continue;
             double x = entity.x;
             double y = entity.y;

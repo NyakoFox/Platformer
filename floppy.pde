@@ -1,7 +1,7 @@
-class Floppy extends Entity {
+class FloppyEntity extends Entity {
     boolean collected;
 
-    Floppy(double x, double y) {
+    FloppyEntity(double x, double y) {
         super("floppy", x, y, 15, 15);
 
         collected = false;
@@ -13,25 +13,13 @@ class Floppy extends Entity {
     void onCollision(Entity other) {
         if (!collected) {
             setFlag("collected", true);
-            doRippleEffect(x, y);
-            floppy_timer = 0;
-            flags.set("floppies", flags.getInteger("floppies", 0) + 1);
-            registry.playSound("collectible");
+            MAIN.STATE_GAMEPLAY.doRippleEffect(x, y);
+            MAIN.STATE_GAMEPLAY.floppy_timer = 0;
+            MAIN.STATE_GAMEPLAY.flags.set("floppies", MAIN.STATE_GAMEPLAY.flags.getInteger("floppies", 0) + 1);
+            Registry.playSound("collectible");
             collected = true;
             visible = false;
         }
-    }
-
-    void save(JSONObject json) {
-        // Save data to the map (for the hacky editor)
-        json.setBoolean("collected", collected);
-        super.save(json);
-    }
-
-    void load(JSONObject json) {
-        // Load data from the map
-        collected = json.getBoolean("collected");
-        super.load(json);
     }
 
     void onAdd() {

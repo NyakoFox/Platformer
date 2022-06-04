@@ -17,7 +17,6 @@ class Entity {
     double sprite_offset_y;
     boolean flipped;
     Map map;
-    EntityData data_reference;
     boolean visible;
 
     String uuid;
@@ -58,36 +57,26 @@ class Entity {
         animation = null;
     }
 
-    public void setFlag(String key, String  value) { flags.set(uuid + "/" + key, value); }
-    public void setFlag(String key, Boolean value) { flags.set(uuid + "/" + key, value); }
-    public void setFlag(String key, Integer value) { flags.set(uuid + "/" + key, value); }
-    public void setFlag(String key, Float   value) { flags.set(uuid + "/" + key, value); }
-    public void setFlag(String key, Double  value) { flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, String  value) { MAIN.STATE_GAMEPLAY.flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, Boolean value) { MAIN.STATE_GAMEPLAY.flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, Integer value) { MAIN.STATE_GAMEPLAY.flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, Float   value) { MAIN.STATE_GAMEPLAY.flags.set(uuid + "/" + key, value); }
+    public void setFlag(String key, Double  value) { MAIN.STATE_GAMEPLAY.flags.set(uuid + "/" + key, value); }
 
-    public String  getFlagString (String key) { return flags.getString (uuid + "/" + key); }
-    public Boolean getFlagBoolean(String key) { return flags.getBoolean(uuid + "/" + key); }
-    public Integer getFlagInteger(String key) { return flags.getInteger(uuid + "/" + key); }
-    public Float   getFlagFloat  (String key) { return flags.getFloat  (uuid + "/" + key); }
-    public Double  getFlagDouble (String key) { return flags.getDouble (uuid + "/" + key); }
+    public String  getFlagString (String key) { return MAIN.STATE_GAMEPLAY.flags.getString (uuid + "/" + key); }
+    public Boolean getFlagBoolean(String key) { return MAIN.STATE_GAMEPLAY.flags.getBoolean(uuid + "/" + key); }
+    public Integer getFlagInteger(String key) { return MAIN.STATE_GAMEPLAY.flags.getInteger(uuid + "/" + key); }
+    public Float   getFlagFloat  (String key) { return MAIN.STATE_GAMEPLAY.flags.getFloat  (uuid + "/" + key); }
+    public Double  getFlagDouble (String key) { return MAIN.STATE_GAMEPLAY.flags.getDouble (uuid + "/" + key); }
 
-    public String  getFlagString (String key, String  defaultValue) { return flags.getString (uuid + "/" + key, defaultValue); }
-    public Boolean getFlagBoolean(String key, Boolean defaultValue) { return flags.getBoolean(uuid + "/" + key, defaultValue); }
-    public Integer getFlagInteger(String key, Integer defaultValue) { return flags.getInteger(uuid + "/" + key, defaultValue); }
-    public Float   getFlagFloat  (String key, Float   defaultValue) { return flags.getFloat  (uuid + "/" + key, defaultValue); }
-    public Double  getFlagDouble (String key, Double  defaultValue) { return flags.getDouble (uuid + "/" + key, defaultValue); }
+    public String  getFlagString (String key, String  defaultValue) { return MAIN.STATE_GAMEPLAY.flags.getString (uuid + "/" + key, defaultValue); }
+    public Boolean getFlagBoolean(String key, Boolean defaultValue) { return MAIN.STATE_GAMEPLAY.flags.getBoolean(uuid + "/" + key, defaultValue); }
+    public Integer getFlagInteger(String key, Integer defaultValue) { return MAIN.STATE_GAMEPLAY.flags.getInteger(uuid + "/" + key, defaultValue); }
+    public Float   getFlagFloat  (String key, Float   defaultValue) { return MAIN.STATE_GAMEPLAY.flags.getFloat  (uuid + "/" + key, defaultValue); }
+    public Double  getFlagDouble (String key, Double  defaultValue) { return MAIN.STATE_GAMEPLAY.flags.getDouble (uuid + "/" + key, defaultValue); }
 
     void onCollision(Entity other) {
         // Override this
-    }
-
-    void save(JSONObject json) {
-        // By default, write UUID
-        json.put("uuid", uuid);
-    }
-
-    void load(JSONObject json) {
-        // By default, load UUID
-        uuid = json.getString("uuid");
     }
 
     void onAdd() {
@@ -147,7 +136,7 @@ class Entity {
     }
 
     HashMap<String, ArrayList<PImage>> getSprites() {
-        return registry.sprites.get(id);
+        return Registry.SPRITES.get(id);
     }
 
     void update() {
@@ -203,7 +192,7 @@ class Entity {
     boolean isInSolid(double x, double y) {
         // Check if we're inside a solid tile, taking into account width and height.
         // use AABB collision detection.
-        return game.current_map.isPosInSolid(x, y) || game.current_map.isPosInSolid(x + getWidth(), y) || game.current_map.isPosInSolid(x, y + getHeight()) || game.current_map.isPosInSolid(x + getWidth(), y + getHeight());
+        return MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x, y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x + getWidth(), y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x, y + getHeight()) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x + getWidth(), y + getHeight());
     }
 
     boolean onGround() {
