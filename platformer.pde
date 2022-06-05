@@ -1,7 +1,7 @@
 boolean DEBUG = true;
 boolean DEBUG_RENDER = false;
 
-PFont font;
+PFont FONT;
 
 enum GameStates {
     MENU,
@@ -12,8 +12,6 @@ enum GameStates {
     CREDITS
 }
 
-Graphics GRAPHICS = new Graphics();
-
 GameStates STATE = GameStates.MENU;
 
 GameplayState STATE_GAMEPLAY;
@@ -22,12 +20,14 @@ EditorState STATE_EDITOR;
 platformer MAIN = this;
 
 void setup() {
-    font = createFont("pcsenior.ttf", 16, false);
+    FONT = createFont("pcsenior.ttf", 16, false);
     // Resize the screen to my favorite resolution (640x480)
     // Also set the renderer to P2D so I can use shaders
     size(640, 480, P2D);
     surface.setTitle("Platforming");
     surface.setResizable(false);
+    Graphics.init(this);
+    Graphics.setFont(FONT);
     Registry.loadAssets(sketchPath(), this);
     frameRate(60);
     loop();

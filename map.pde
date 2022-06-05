@@ -2,7 +2,7 @@ class Map {
     int width, height;
     int real_width, real_height;
     ArrayList<int[][]> layers;
-    boolean[][] collision;
+    int[][] collision;
     Tileset tileset;
     String name;
     int start_x;
@@ -35,7 +35,7 @@ class Map {
         this.connected_up_offset = 0;
         this.connected_down_offset = 0;
 
-        collision = new boolean[height][width];
+        collision = new int[height][width];
 
         this.layers = new ArrayList<>();
         layers.add(new int[height][width]);
@@ -79,11 +79,11 @@ class Map {
         this.tileset = new Tileset(json.getString("tileset"));
         // Load collision
         JSONArray collision_data = json.getJSONArray("collision");
-        this.collision = new boolean[height][width];
+        this.collision = new int[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int data = collision_data.getJSONArray(y).getInt(x);
-                collision[y][x] = (data == 1); // Possibly support other collision types in the future
+                collision[y][x] = data;
             }
         }
         // Load all entities
@@ -93,11 +93,12 @@ class Map {
             for (int i = 0; i < entities.size(); i++) {
                 JSONObject entity_json = entities.getJSONObject(i);
                 MapEntity map_entity = createEntityFromName(entity_json.getString("name"));
-                map_entity.name = entity_json.getString("name");
+                //map_entity.name = entity_json.getString("name");
                 map_entity.x = entity_json.getDouble("x");
                 map_entity.y = entity_json.getDouble("y");
                 map_entity.uuid = entity_json.getString("uuid");
                 map_entity.load(entity_json.getJSONObject("data"));
+                map_entity.onAdd();
                 this.entities.add(map_entity);
             }
         }
@@ -107,6 +108,8 @@ class Map {
         switch (name) {
             case "floppy":
                 return new FloppyMapEntity();
+            case "helptext":
+                return new HelpTextMapEntity();
             default:
                 return new ErrorMapEntity();
         }
@@ -151,10 +154,10 @@ class Map {
         map.setJSONArray("layers", layers);
         map.setString("tileset", tileset.name);
         JSONArray collision_data = new JSONArray();
-        for (boolean[] row : collision) {
+        for (int[] row : collision) {
             JSONArray row_data = new JSONArray();
-            for (boolean col : row) {
-                row_data.setInt(row_data.size(), col ? 1 : 0);
+            for (int col : row) {
+                row_data.setInt(row_data.size(), col);
             }
             collision_data.setJSONArray(collision_data.size(), row_data);
         }
@@ -188,7 +191,7 @@ class Map {
         layers.get(layer)[y][x] = tile;
     }
 
-    void setCollisionTile(int x, int y, boolean tile) {
+    void setCollisionTile(int x, int y, int tile) {
         if (x < 0 || x >= width || y < 0 || y >= height) {
             return;
         }
@@ -196,10 +199,22 @@ class Map {
     }
 
     boolean isPosInSolid(double x, double y) {
-        return isSolid((int) (x / 32), (int) (y / 32));
+        return getCollisionAt((int) (x / 32), (int) (y / 32)) == 1;
     }
 
     boolean isSolid(int x, int y) {
+        return getCollisionAt(x, y) == 1;
+    }
+
+    boolean isPosInSpike(double x, double y) {
+        return getCollisionAt((int) (x / 32), (int) (y / 32)) == 2;
+    }
+
+    boolean isSpike(int x, int y) {
+        return getCollisionAt(x, y) == 2;
+    }
+
+    int getCollisionAt(int x, int y) {
         // Check bounds
         if (x < 0 || x >= width || y < 0 || y >= height) {
             // If collision is out of bounds, then check the edge
@@ -233,7 +248,7 @@ class Map {
         layers = new_layers;
 
         // Shift the collision data
-        boolean[][] new_collision = new boolean[height][width];
+        int[][] new_collision = new int[height][width];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 int new_x = j - x;
@@ -272,7 +287,7 @@ class Map {
         }
         layers = new_layers;
         // Resize the collision array
-        boolean[][] new_collision = new boolean[new_height][new_width];
+        int[][] new_collision = new int[new_height][new_width];
         for (int y = 0; y < new_height; y++) {
             for (int x = 0; x < new_width; x++) {
                 if (y < height && x < width) {

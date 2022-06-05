@@ -11,16 +11,21 @@ class Player extends Entity {
     double checkpoint_y = 0;
     int coyote_time = 0;
     String checkpoint_map = "";
+    boolean dying = false;
+    int death_timer = 0;
+    int death_angle = 0;
+    double death_speed = 0;
 
     Player(double x, double y) {
-        super("player", x, y, 12, 10);
+        super("player", x, y, 10, 24);
 
-        sprite_offset_x = -4;
-        sprite_offset_y = -10;
+        sprite_offset_x = -6;
+        sprite_offset_y = -14;
 
         registerAnimationSpeed("idle", 0.05);
         registerAnimationSpeed("squish", 0.25);
-        registerAnimationSpeed("walk", 0.25);
+        registerAnimationSpeed("walk", 0.1);
+        registerAnimationSpeed("explode", 0.5);
 
         setAnimation("idle");
 
@@ -61,7 +66,60 @@ class Player extends Entity {
         }
     }
 
+    void kill() {
+        if (!dying) {
+            dying = true;
+            death_timer = 0;
+
+            squishing = false;
+
+            // Get angle of velocity
+            int old_angle = (int) Math.round(Math.toDegrees(Math.atan2(y_velocity, x_velocity)));
+            // Set death_angle to the opposite direction
+            death_angle = (old_angle + 180) % 360;
+
+            death_speed = 5.5;
+
+            setAnimation("death");
+        }
+    }
+
     void update() {
+        if (dying) {
+            noclip = true;
+            enableGravity(false);
+
+            // Move player by the angle of death_angle, and speed of death_speed
+            x += Math.cos(Math.toRadians(death_angle)) * death_speed;
+            y += Math.sin(Math.toRadians(death_angle)) * death_speed;
+
+            death_speed = Double.max(death_speed - 0.25, 0);
+
+            x_velocity = 0;
+            y_velocity = 0;
+
+            death_timer++;
+
+            if (death_timer == 20) {
+                death_speed = 0;
+                sprite_offset_x = -90;
+                sprite_offset_y = -120;
+                setAnimation("explode");
+            }
+            if (death_timer > 60) {
+                noclip = false;
+                enableGravity(true);
+                sprite_offset_x = -6;
+                sprite_offset_y = -14;
+                setAnimation("idle");
+                dying = false;
+                death_timer = 0;
+                gotoCheckpoint();
+            }
+            super.update();
+            return;
+        }
+
         // Jump if we're on the ground
         // Or if we WERE in the past 6 frames (coyote time)
         if (onGround()) coyote_time = 6;
@@ -162,6 +220,35 @@ class Player extends Entity {
                 entity.onCollision(this);
             }
         }
+
+        if (isInSpike(x, y)) {
+            kill();
+        }
+    }
+
+    void draw() {
+        tint(255, 255, 255);
+
+        if (animation == "walk") {
+            ArrayList<PImage> sprites = Registry.SPRITES.get("player").get("runfire");
+            PImage sprite = sprites.get((frameCount / 8) % sprites.size());
+            if (!flipped) {
+                image(sprite, (float)x - 24, (float)y + 28, 16, 16);
+            } else {
+                pushMatrix();
+                translate((float)x + sprite.width, (float)y + 28);
+                scale(-1,1);
+                image(sprite, - ((float)(width * 2) + 16), 0, 16, 16);
+                popMatrix();
+                //image(sprite, (float)(x + (width * 2) + 22), (float)y + 28, -16, 16);
+            }
+        }
+
+        if (dying && (animation != "explode")) {
+            tint(255, 0, 0);
+        }
+        super.draw();
+        tint(255, 255, 255);
     }
 
     void updateAnimation() {
@@ -185,6 +272,9 @@ class Player extends Entity {
     void animationLooped(String animation) {
         if (animation.equals("squish")) {
             squishing = false;
+        }
+        if (animation.equals("explode")) {
+            setAnimation(null);
         }
     }
 }

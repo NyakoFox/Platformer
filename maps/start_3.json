@@ -4,7 +4,7 @@
   "connected_right": "",
   "connected_down_offset": 0,
   "connected_right_offset": 0,
-  "start_x": 164,
+  "start_x": 166,
   "collision": [
     [
       0,
@@ -451,8 +451,53 @@
   "connected_up": "",
   "connected_down": "",
   "tileset": "indust",
-  "entities": [],
-  "start_y": 490,
+  "entities": [
+    {
+      "data": {
+        "center_size": 258,
+        "text": "The CAMERA",
+        "type": 0
+      },
+      "name": "helptext",
+      "x": 47,
+      "y": 128,
+      "uuid": "8811cdb7-cdf6-4c9c-80bd-eaf7c2a41f57"
+    },
+    {
+      "data": {
+        "center_size": 258,
+        "text": "follows the",
+        "type": 0
+      },
+      "name": "helptext",
+      "x": 39,
+      "y": 160,
+      "uuid": "4ab819bb-5d4d-4005-b1f5-9cc54258f969"
+    },
+    {
+      "data": {
+        "center_size": 258,
+        "text": "PLAYER when",
+        "type": 0
+      },
+      "name": "helptext",
+      "x": 39,
+      "y": 192,
+      "uuid": "a7ea9f58-6c28-4162-873a-0502e7566814"
+    },
+    {
+      "data": {
+        "center_size": 258,
+        "text": "they move",
+        "type": 0
+      },
+      "name": "helptext",
+      "x": 55,
+      "y": 224,
+      "uuid": "e35468c8-7fd7-4c49-a83d-abb070aa6979"
+    }
+  ],
+  "start_y": 464,
   "width": 20,
   "layers": [[
     [

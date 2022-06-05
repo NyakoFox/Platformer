@@ -5,8 +5,6 @@ class MapEntity {
     double x, y, width, height;
     String uuid;
 
-    JSONObject data;
-
     boolean hovered;
 
     // Initialize variables
@@ -31,9 +29,15 @@ class MapEntity {
         // Read data from the JSON
     }
 
+    void onAdd() {
+        // Called when the entity is added to the map
+    }
+
     Entity createEntity() {
         // Create your entity here
-        return new ErrorEntity(x, y);
+        Entity entity = new ErrorEntity(x, y);
+        entity.uuid = uuid;
+        return entity;
     }
 
     void update() {

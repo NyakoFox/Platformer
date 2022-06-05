@@ -421,31 +421,44 @@ class EditorState {
                         break;
                     case 1:
                         if (Input.mouseDown(0)) {
-                            current_map.setCollisionTile(mouse_tile_x, mouse_tile_y, true);
+                            current_map.setCollisionTile(mouse_tile_x, mouse_tile_y, 1);
                         } else if (Input.mouseDown(1)) {
-                            current_map.setCollisionTile(mouse_tile_x, mouse_tile_y, false);
+                            current_map.setCollisionTile(mouse_tile_x, mouse_tile_y, 0);
+                        }
+                        break;
+                    case 2:
+                        if (Input.mouseDown(0)) {
+                            current_map.setCollisionTile(mouse_tile_x, mouse_tile_y, 2);
+                        } else if (Input.mouseDown(1)) {
+                            current_map.setCollisionTile(mouse_tile_x, mouse_tile_y, 0);
                         }
                         break;
                     case 3: // COLLECTIBLES
                         if (Input.mousePressed(0)) {
-                            placeEntity("floppy", mouse_tile_x * 32, mouse_tile_y * 32);
-                            //addSavedEntity("floppy", mouse_tile_x * 32, mouse_tile_y * 32);
+                            MapEntity entity = placeEntity("floppy", mouse_tile_x * 32, mouse_tile_y * 32);
+                            entity.onAdd();
                         } else if (Input.mousePressed(1)) {
-                            MapEntity entity = getEntityUnderCursor();
-                            if (entity != null) {
-                                removeEntity(entity);
-                                //removeSavedEntity(entity);
-                            }
+                            removeEntityUnderCursor();
                         }
                         break;
                     case 4: // CHECKPOINTS
                         break;
                     case 8: // GENERIC ENTITIES
+                        if (Input.mousePressed(0)) {
+                            Input.clearPressed();
+                            String new_name = JOptionPane.showInputDialog("Enter the ID of the entity");
+                            if (new_name != null) {
+                                MapEntity entity = placeEntity(new_name, mouse_tile_x * 32, mouse_tile_y * 32);
+                                entity.onAdd();
+                            }
+                        } else if (Input.mousePressed(1)) {
+                            removeEntityUnderCursor();
+                        }
                         break;
                     case 9:
                         if (Input.mousePressed(0)) {
-                            current_map.start_x = (mouse_tile_x * 32) + 4;
-                            current_map.start_y = (mouse_tile_y * 32) + 10;
+                            current_map.start_x = (mouse_tile_x * 32) + 6;
+                            current_map.start_y = (mouse_tile_y * 32) + 16;
                             //player.setCheckpoint(current_map.start_x, current_map.start_y);
                         }
                     default:
@@ -522,6 +535,13 @@ class EditorState {
         current_map.entities.remove(entity);
     }
 
+    void removeEntityUnderCursor() {
+        MapEntity entity = getEntityUnderCursor();
+        if (entity != null) {
+            removeEntity(entity);
+        }
+    }
+
     void applyCameraTransform() {
         // The coordinates will be the center of the viewpoint
         translate((float) -camera_x + 320, (float) -camera_y + 240);
@@ -560,16 +580,26 @@ class EditorState {
                 }
 
                 DEBUG_RENDER = false;
-                if (Input.down("shift") || current_tool == 1) {
+                if (Input.down("shift") || current_tool == 1 || current_tool == 2) {
                     DEBUG_RENDER = true;
                     // Draw all collision tiles as red outlines
                     for (int y = 0; y < current_map.height; y++) {
                         for (int x = 0; x < current_map.width; x++) {
-                            if (current_map.collision[y][x]) {
-                                noFill();
-                                stroke(255, 0, 0);
-                                strokeWeight(2);
-                                rect(x * 32, y * 32, 32, 32);
+                            switch (current_map.collision[y][x]) {
+                                case 0:
+                                    break;
+                                case 1:
+                                    noFill();
+                                    stroke(255, 0, 0);
+                                    strokeWeight(2);
+                                    rect(x * 32, y * 32, 32, 32);
+                                    break;
+                                case 2:
+                                    noFill();
+                                    stroke(0, 0, 255);
+                                    strokeWeight(2);
+                                    rect(x * 32, y * 32, 32, 32);
+                                break;
                             }
                         }
                     }
@@ -614,8 +644,20 @@ class EditorState {
                         strokeWeight(2);
                         rect(16 + 4, 16 + 4, 32 - 8, 32 - 8);
                         break;
-                    case 2: tool_name = "???"; break;
-                    case 3: tool_name = "COLLECTIBLES"; break;
+                    case 2:
+                        tool_name = "SPIKES";
+
+                        // Draw blue box outline in the top-left box
+                        noFill();
+                        stroke(0, 0, 255);
+                        strokeWeight(2);
+                        rect(16 + 4, 16 + 4, 32 - 8, 32 - 8);
+                        break;
+                    case 3:
+                        tool_name = "COLLECTIBLES";
+                        var sprites = Registry.SPRITES.get("floppy").get("idle");
+                        image(sprites.get((frameCount / 8) % sprites.size()), 16, 16, 32, 32);
+                        break;
                     case 4: tool_name = "CHECKPOINTS"; break;
                     case 5: tool_name = "???"; break;
                     case 6: tool_name = "???"; break;
@@ -624,10 +666,10 @@ class EditorState {
                     case 9:
                         tool_name = "START";
                         // Draw the player's sprite at their spawn point
-                        int player_sprite_offset_x = -4;
-                        int player_sprite_offset_y = -10;
+                        int player_sprite_offset_x = -6;
+                        int player_sprite_offset_y = -14;
 
-                        PImage sprite = Registry.SPRITES.get("player").get("idle").get(2);
+                        PImage sprite = Registry.SPRITES.get("player").get("idle").get(0);
                         float draw_x = (float) (current_map.getStartX() + player_sprite_offset_x - camera_left);
                         float draw_y = (float) (current_map.getStartY() + player_sprite_offset_y - camera_top);
                         tint(255, 255, 255, 127);
@@ -636,8 +678,8 @@ class EditorState {
                         // Do the same but under the cursor
                         int cursor_x = (int) ((mouseX / 32) * 32);
                         int cursor_y = (int) ((mouseY / 32) * 32);
-                        draw_x = (float) ((float) cursor_x + player_sprite_offset_x) + 4;
-                        draw_y = (float) ((float) cursor_y + player_sprite_offset_y) + 10;
+                        draw_x = (float) ((float) cursor_x + player_sprite_offset_x) + 6;
+                        draw_y = (float) ((float) cursor_y + player_sprite_offset_y) + 16;
                         image(sprite, draw_x, draw_y, (float) (sprite.width * 2), (float) (sprite.height * 2));
                         break;
                     }
@@ -658,15 +700,15 @@ class EditorState {
                 popMatrix();
 
                 fill(255);
-                GRAPHICS.outlineText("Tool: " + tool_name, 16 + 32 + 16, 32);
-                GRAPHICS.outlineText("Subtool: " + subtool_name, 16 + 32 + 16, 32 + 16);
+                Graphics.outlineText("Tool: " + tool_name, 16 + 32 + 16, 32);
+                Graphics.outlineText("Subtool: " + subtool_name, 16 + 32 + 16, 32 + 16);
 
                 noFill();
                 strokeWeight(2);
                 stroke(230, 230, 230); // slightly gray is cool
                 rect(15, 15, 32 + 2, 32 + 2);
 
-                GRAPHICS.outlineText("FPS: " + frameRate, 16, 64);
+                Graphics.outlineText("FPS: " + frameRate, 16, 64);
                 break;
 
             case TILE_PICKER:

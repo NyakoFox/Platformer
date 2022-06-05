@@ -18,6 +18,7 @@ class Entity {
     boolean flipped;
     Map map;
     boolean visible;
+    boolean noclip;
 
     String uuid;
 
@@ -39,6 +40,7 @@ class Entity {
         this.y_velocity = 0d;
 
         uses_gravity = false;
+        noclip = false;
 
         visible = true;
 
@@ -190,15 +192,21 @@ class Entity {
     }
 
     boolean isInSolid(double x, double y) {
+        if (noclip) return false;
         // Check if we're inside a solid tile, taking into account width and height.
         // use AABB collision detection.
         return MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x, y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x + getWidth(), y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x, y + getHeight()) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x + getWidth(), y + getHeight());
     }
 
+    boolean isInSpike(double x, double y) {
+        // Do the same but for spikes.
+        return MAIN.STATE_GAMEPLAY.current_map.isPosInSpike(x, y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSpike(x + getWidth(), y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSpike(x, y + getHeight()) || MAIN.STATE_GAMEPLAY.current_map.isPosInSpike(x + getWidth(), y + getHeight());
+    }
+
     boolean onGround() {
         // Check if we're on the ground, taking into account velocity.
         if (y_velocity > 0) return false;
-        return isInSolid(x, (int) (y + getHeight()));
+        return isInSolid(x, (int) (y + 4));
 
     }
 

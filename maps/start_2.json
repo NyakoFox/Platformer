@@ -4,7 +4,7 @@
   "connected_right": "start_3",
   "connected_down_offset": 0,
   "connected_right_offset": 5,
-  "start_x": 100,
+  "start_x": 102,
   "collision": [
     [
       0,
@@ -341,8 +341,18 @@
   "connected_up": "",
   "connected_down": "",
   "tileset": "indust",
-  "entities": [],
-  "start_y": 330,
+  "entities": [{
+    "data": {
+      "center_size": 640,
+      "text": "Press [Z] to jump",
+      "type": 2
+    },
+    "name": "helptext",
+    "x": 182,
+    "y": 416,
+    "uuid": "54e0c090-f763-4f86-b3ac-d628ce553f18"
+  }],
+  "start_y": 304,
   "width": 20,
   "layers": [[
     [

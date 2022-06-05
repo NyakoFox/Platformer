@@ -54,6 +54,8 @@ public static class Registry {
         // Loop through the sprites directory
         File dir = new File(SKETCH_PATH + "/sprites/" + sprite_name + "/");
         File[] files = dir.listFiles();
+
+        // Loop through the files in the directory and load them
         for (int i = 0; i < files.length; i++) {
             String name = files[i].getName();
             String path = files[i].getAbsolutePath();
@@ -65,7 +67,8 @@ public static class Registry {
             } else {
                 ArrayList<PImage> images = new ArrayList<>();
                 for (int j = 0; j < files[i].listFiles().length; j++) {
-                    images.add(MAIN.loadImage(files[i].listFiles()[j].getAbsolutePath()));
+                    String new_path = files[i].getAbsolutePath() + "\\" + (j + 1) + ".png";
+                    images.add(MAIN.loadImage(new_path));
                 }
                 loaded_sprites.put(name, images);
             }

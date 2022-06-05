@@ -8,7 +8,9 @@ class FloppyMapEntity extends MapEntity {
 
     Entity createEntity() {
         // Create your entity here
-        return new FloppyEntity(x, y);
+        Entity entity = new FloppyEntity(x, y);
+        entity.uuid = uuid;
+        return entity;
     }
 
     void draw() {

@@ -198,7 +198,7 @@ class GameplayState {
             // Draw all collision tiles as red outlines
             for (int y = 0; y < current_map.height; y++) {
                 for (int x = 0; x < current_map.width; x++) {
-                    if (current_map.collision[y][x]) {
+                    if (current_map.collision[y][x] == 1) {
                         noFill();
                         stroke(255, 0, 0);
                         strokeWeight(2);
@@ -214,9 +214,9 @@ class GameplayState {
 
         fill(255);
         if (playtesting) {
-            GRAPHICS.outlineText("Press ENTER to return to editor", 16, 32);
+            Graphics.outlineText("Press ENTER to return to editor", 16, 32);
         }
-        GRAPHICS.outlineText("FPS: " + frameRate, 16, 64 + 16);
+        Graphics.outlineText("FPS: " + frameRate, 16, 64 + 16);
 
         // HUD
 
@@ -261,7 +261,7 @@ class GameplayState {
             fill(255);
             var sprites = Registry.SPRITES.get("floppy").get("idle");
             image(sprites.get((frameCount / 8) % sprites.size()), (int) floppy_x, floppy_y - 16, 32, 32);
-            GRAPHICS.outlineText(" - " + flags.getInteger("floppies"), (int) floppy_x + 32, base_floppy_y);
+            Graphics.outlineText(" - " + flags.getInteger("floppies"), (int) floppy_x + 32, base_floppy_y);
         }
     }
 
