@@ -348,9 +348,11 @@ class EditorState {
                         Input.clearPressed();
                         String open = JOptionPane.showInputDialog("Enter name of map to load");
                         if (open != null) {
+                            Registry.reloadMap(open);
                             switchMap(open);
                         }
                     } else {
+                        Registry.reloadMap(current_map.name);
                         switchMap(current_map.name);
                     }
                 }
@@ -550,7 +552,7 @@ class EditorState {
     // Draw
     void draw() {
         // Clear the canvas
-        background(28, 32, 44);
+        background(29, 33, 45);
 
         Tileset tileset = current_map.tileset;
 

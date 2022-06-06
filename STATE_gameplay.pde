@@ -151,12 +151,6 @@ class GameplayState {
             entities.get(i).update();
         }
 
-        if (Input.pressed("R")) {
-            player.gotoCheckpoint();
-            updateCamera();
-            return;
-        }
-
         if (Input.pressed("enter")) {
             MAIN.exitPlaytesting();
             return;
@@ -173,7 +167,7 @@ class GameplayState {
     // Draw
     void draw() {
         // Clear the canvas
-        background(28, 32, 44);
+        background(29, 33, 45);
 
         Tileset tileset = current_map.tileset;
 
@@ -198,11 +192,21 @@ class GameplayState {
             // Draw all collision tiles as red outlines
             for (int y = 0; y < current_map.height; y++) {
                 for (int x = 0; x < current_map.width; x++) {
-                    if (current_map.collision[y][x] == 1) {
-                        noFill();
-                        stroke(255, 0, 0);
-                        strokeWeight(2);
-                        rect(x * 32, y * 32, 32, 32);
+                    switch (current_map.collision[y][x]) {
+                        case 0:
+                            break;
+                        case 1:
+                            noFill();
+                            stroke(255, 0, 0);
+                            strokeWeight(2);
+                            rect(x * 32, y * 32, 32, 32);
+                            break;
+                        case 2:
+                            noFill();
+                            stroke(0, 0, 255);
+                            strokeWeight(2);
+                            rect(x * 32, y * 32, 32, 32);
+                        break;
                     }
                 }
             }

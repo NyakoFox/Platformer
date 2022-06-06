@@ -122,7 +122,7 @@ void updateStates() {
 // Draw
 void drawStates() {
     // Clear the canvas
-    background(28, 32, 44);
+    background(29, 33, 45);
 
     switch (STATE) {
         case MENU:

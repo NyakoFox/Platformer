@@ -15,6 +15,9 @@ class Player extends Entity {
     int death_timer = 0;
     int death_angle = 0;
     double death_speed = 0;
+    boolean fading_in = false;
+    boolean fading_out = false;
+    int fade_timer = 0;
 
     Player(double x, double y) {
         super("player", x, y, 10, 24);
@@ -80,11 +83,27 @@ class Player extends Entity {
 
             death_speed = 5.5;
 
+            Registry.playSound("death");
             setAnimation("death");
         }
     }
 
     void update() {
+        if (fading_out) {
+            fade_timer++;
+            if (fade_timer > 30) {
+                fade_timer = 30;
+                fading_out = false;
+            }
+        }
+        if (fading_in) {
+            fade_timer--;
+            if (fade_timer < 0) {
+                fade_timer = 0;
+                fading_in = false;
+            }
+        }
+
         if (dying) {
             noclip = true;
             enableGravity(false);
@@ -104,9 +123,15 @@ class Player extends Entity {
                 death_speed = 0;
                 sprite_offset_x = -90;
                 sprite_offset_y = -120;
+                Registry.stopSound("death");
+                Registry.playSound("explosion");
                 setAnimation("explode");
             }
+            if (death_timer == 30) {
+                fadeOut();
+            }
             if (death_timer > 60) {
+                fadeIn();
                 noclip = false;
                 enableGravity(true);
                 sprite_offset_x = -6;
@@ -117,6 +142,11 @@ class Player extends Entity {
                 gotoCheckpoint();
             }
             super.update();
+            return;
+        }
+
+        if (Input.pressed("R")) {
+            kill();
             return;
         }
 
@@ -169,11 +199,12 @@ class Player extends Entity {
         super.update();
 
         if (x + width > MAIN.STATE_GAMEPLAY.current_map.real_width) {
+            println("RIGHT");
+            x -= MAIN.STATE_GAMEPLAY.current_map.real_width;
             if (!MAIN.STATE_GAMEPLAY.current_map.connected_right.equals("")) {
                 y += MAIN.STATE_GAMEPLAY.current_map.connected_right_offset * 32;
                 MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_right);
             }
-            x -= MAIN.STATE_GAMEPLAY.current_map.real_width;
         }
 
         if (x + width < 0) {
@@ -185,11 +216,11 @@ class Player extends Entity {
         }
 
         if (y + height > MAIN.STATE_GAMEPLAY.current_map.real_height) {
+            y -= MAIN.STATE_GAMEPLAY.current_map.real_height;
             if (!MAIN.STATE_GAMEPLAY.current_map.connected_down.equals("")) {
                 x += MAIN.STATE_GAMEPLAY.current_map.connected_down_offset * 32;
                 MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_down);
             }
-            y -= MAIN.STATE_GAMEPLAY.current_map.real_height;
         }
 
         if (y + height < 0) {
@@ -249,6 +280,53 @@ class Player extends Entity {
         }
         super.draw();
         tint(255, 255, 255);
+
+        if (fade_timer > 0) {
+            float offset = easeExpoOut(fade_timer, 640, -640, 30);
+            fill(29, 33, 45);
+            noStroke();
+            // Draw a bottom-left triangle
+            triangle(
+                (float)STATE_GAMEPLAY.camera_left + -offset, (float)STATE_GAMEPLAY.camera_top + 0f,
+                (float)STATE_GAMEPLAY.camera_left + -offset, (float)STATE_GAMEPLAY.camera_top + 480,
+                (float)STATE_GAMEPLAY.camera_left + 640 - offset, (float)STATE_GAMEPLAY.camera_top + 480
+            );
+
+            triangle(
+                (float)STATE_GAMEPLAY.camera_left + 0 + offset, (float)STATE_GAMEPLAY.camera_top + 0f,
+                (float)STATE_GAMEPLAY.camera_left + 640 + offset, (float)STATE_GAMEPLAY.camera_top + 0,
+                (float)STATE_GAMEPLAY.camera_left + 640 + offset, (float)STATE_GAMEPLAY.camera_top + 480
+            );
+
+            // Draw lines on the edges of the triangles
+            stroke(255, 255, 255);
+            line(
+                (float)STATE_GAMEPLAY.camera_left + -offset, (float)STATE_GAMEPLAY.camera_top + 0f,
+                (float)STATE_GAMEPLAY.camera_left + 640 - offset, (float)STATE_GAMEPLAY.camera_top + 480
+            );
+            line(
+                (float)STATE_GAMEPLAY.camera_left + 0 + offset, (float)STATE_GAMEPLAY.camera_top + 0f,
+                (float)STATE_GAMEPLAY.camera_left + 640 + offset, (float)STATE_GAMEPLAY.camera_top + 480
+            );
+        }
+    }
+
+    void fadeOut() {
+        fading_in = false;
+        fading_out = true;
+    }
+
+    void fadeIn() {
+        fading_in = true;
+        fading_out = false;
+    }
+
+    // t is the time
+    // b is the beginning value
+    // c is the change in value
+    // d is the duration
+    float easeExpoOut(float t, float b, float c, float d) {
+        return (t==d) ? b+c : c * (-(float)Math.pow(2, -10 * t/d) + 1) + b;
     }
 
     void updateAnimation() {

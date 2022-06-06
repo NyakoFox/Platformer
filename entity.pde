@@ -1,4 +1,5 @@
 import java.util.UUID;
+import java.awt.Point;
 
 class Entity {
     double x, y, width, height;
@@ -194,13 +195,39 @@ class Entity {
     boolean isInSolid(double x, double y) {
         if (noclip) return false;
         // Check if we're inside a solid tile, taking into account width and height.
-        // use AABB collision detection.
-        return MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x, y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x + getWidth(), y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x, y + getHeight()) || MAIN.STATE_GAMEPLAY.current_map.isPosInSolid(x + getWidth(), y + getHeight());
+
+        Point top_left = getTileCoordinates(x, y);
+        Point bottom_right = getTileCoordinates(x + getWidth(), y + getHeight());
+
+        for (int y2 = (int)top_left.getY(); y2 <= (int)bottom_right.getY(); y2++) {
+            for (int x2 = (int)top_left.getX(); x2 <= (int)bottom_right.getX(); x2++) {
+                if (MAIN.STATE_GAMEPLAY.current_map.isSolid(x2, y2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
+
+    Point getTileCoordinates(double x, double y) {
+        return new Point((int) (x / 32), (int) (y / 32));
+    }
+
+
 
     boolean isInSpike(double x, double y) {
         // Do the same but for spikes.
-        return MAIN.STATE_GAMEPLAY.current_map.isPosInSpike(x, y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSpike(x + getWidth(), y) || MAIN.STATE_GAMEPLAY.current_map.isPosInSpike(x, y + getHeight()) || MAIN.STATE_GAMEPLAY.current_map.isPosInSpike(x + getWidth(), y + getHeight());
+        Point top_left = getTileCoordinates(x, y);
+        Point bottom_right = getTileCoordinates(x + getWidth(), y + getHeight());
+
+        for (int y2 = (int)top_left.getY(); y2 <= (int)bottom_right.getY(); y2++) {
+            for (int x2 = (int)top_left.getX(); x2 <= (int)bottom_right.getX(); x2++) {
+                if (MAIN.STATE_GAMEPLAY.current_map.isSpike(x2, y2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     boolean onGround() {

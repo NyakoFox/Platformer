@@ -37,6 +37,7 @@ class Map {
 
         collision = new int[height][width];
 
+        this.entities = new ArrayList<MapEntity>();
         this.layers = new ArrayList<>();
         layers.add(new int[height][width]);
     }
@@ -198,6 +199,10 @@ class Map {
         collision[y][x] = tile;
     }
 
+    int getCollisionAtPos(double x, double y) {
+        return getCollisionAt((int) (x / 32), (int) (y / 32));
+    }
+
     boolean isPosInSolid(double x, double y) {
         return getCollisionAt((int) (x / 32), (int) (y / 32)) == 1;
     }
@@ -317,10 +322,23 @@ class Map {
     }
 }
 
+class AnimatedTile {
+    int frame;
+    ArrayList<Integer> frames;
+    int speed;
+
+    AnimatedTile(ArrayList<Integer> arraylist, int speed) {
+        this.speed = speed;
+        frames = arraylist;
+        frame = 0;
+    }
+}
+
 class Tileset {
     ArrayList<PImage> tiles;
     int horizontal_tiles, vertical_tiles;
     String name;
+    HashMap<Integer, AnimatedTile> animated_tiles;
     Tileset(String filename) {
         name = filename;
         PImage image = loadImage("tilesets/" + filename + ".png");
@@ -335,6 +353,36 @@ class Tileset {
                 tiles.add(image.get(x * 16, y * 16, 16, 16));
             }
         }
+
+        animated_tiles = new HashMap<>();
+
+        // Check if the tileset json exists
+        File json_file = new File(sketchPath() + "/tilesets/" + filename + ".json");
+        if (json_file.exists()) {
+            // Load the tileset json
+            JSONObject json = loadJSONObject("tilesets/" + filename + ".json");
+            JSONArray animated = json.getJSONArray("animated");
+            for (int i = 0; i < animated.size(); i++) {
+                JSONObject animation = animated.getJSONObject(i);
+                // Get the "tile" array and turn it into an ID
+                JSONArray tile_array = animation.getJSONArray("tile");
+                int tile_x = tile_array.getInt(0);
+                int tile_y = tile_array.getInt(1);
+                int tile_id = tile_y * horizontal_tiles + tile_x;
+
+                // Get the "frames" array and turn it into an ArrayList of tile IDs
+                JSONArray frames_array = animation.getJSONArray("frames");
+                ArrayList<Integer> frames = new ArrayList<>();
+                for (int j = 0; j < frames_array.size(); j++) {
+                    JSONArray frame_array = frames_array.getJSONArray(j);
+                    int frame_x = frame_array.getInt(0);
+                    int frame_y = frame_array.getInt(1);
+                    int frame_id = frame_y * horizontal_tiles + frame_x;
+                    frames.add(frame_id);
+                }
+                animated_tiles.put(tile_id, new AnimatedTile(frames, animation.getInt("delay")));
+            }
+        }
     }
 
     void drawTile(int x, int y, int tile) {
@@ -342,6 +390,11 @@ class Tileset {
 
         //int tile_x = tile % horizontal_tiles;
         //int tile_y = tile / horizontal_tiles;
+
+        if (animated_tiles.containsKey(tile)) {
+            var animated_tile = animated_tiles.get(tile);
+            tile = animated_tile.frames.get((frameCount / animated_tile.speed) % animated_tile.frames.size());
+        }
 
         tint(255, 255, 255, 255);
         image(tiles.get(tile), x, y, 32, 32);

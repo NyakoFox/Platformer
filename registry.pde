@@ -16,13 +16,31 @@ public static class Registry {
     }
 
     public static void playSound(String name) {
-        SOUNDS.get(name).play();
+        SoundFile sound = SOUNDS.get(name);
+        if (sound != null) {
+            try {
+                sound.play();
+            } catch (Exception e) {
+                // Sometimes the sound library fails to play certain audio files
+                // meaning I have to re-encode them in FFMPEG
+                // This at least makes sure it doesn't crash the game
+                println("[REGISTRY] [WARNING] Sound library failed to play sound " + name);
+            }
+        } else {
+            println("[REGISTRY] [WARNING] Attempted to play sound which doesn't exist: " + name);
+        }
     }
 
     public static void playSound(String name, float volume, float pitch) {
-        SOUNDS.get(name).play();
+        // Technically less safe but I'm feeling lazy
+        playSound(name);
         SOUNDS.get(name).amp(volume);
         SOUNDS.get(name).rate(pitch);
+    }
+
+    public static void stopSound(String name) {
+        // No safety here either
+        SOUNDS.get(name).stop();
     }
 
     public static void registerSounds() {
@@ -31,7 +49,9 @@ public static class Registry {
         File[] soundFiles = soundsDir.listFiles();
         for (File soundFile : soundFiles) {
             String soundName = soundFile.getName();
-            SOUNDS.put(soundName.substring(0, soundName.length() - 4), new SoundFile(MAIN, soundFile.getPath()));
+            soundName = soundName.substring(0, soundName.length() - 4);
+            SoundFile audio = new SoundFile(MAIN, soundFile.getPath());
+            SOUNDS.put(soundName, audio);
             println("[REGISTRY] Registered sound " + soundName);
         }
     }
@@ -90,4 +110,14 @@ public static class Registry {
             }
         }
     }
+
+    public static void reloadMap(String map_name) {
+        File file = new File(SKETCH_PATH + "/maps/" + map_name);
+        if (file != null) {
+            Map map = MAIN.new Map(map_name);
+            MAPS.put(map_name, map);
+            println("[REGISTRY] Reloaded map " + map_name);
+        }
+    }
+
 }
