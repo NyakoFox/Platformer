@@ -1,4 +1,5 @@
 # Platformer
+
 A (rushed) small little platformer I wrote for a class
 
 This platformer was written using [Processing](https://processing.org/), with the code being written in [Visual Studio Code](https://code.visualstudio.com/) instead of the built-in IDE.
@@ -8,18 +9,22 @@ This platformer was written using [Processing](https://processing.org/), with th
 * The sprites were made by me.
 * The solid tiles, the electricity tiles and the fans were all made by me.
 * The BG tiles and the palette were made by [0x72](https://0x72.itch.io/16x16-industrial-tileset).
+* The explosion in the death animation was from [here](https://xyezawr.itch.io/free-pixel-effects-pack-4-explosions).
 
-# How do I play?
+## How do I play?
+
 It's explained in-game, but the basics are:
 
 **Left and right arrow keys** to move. **Z** to jump. **R** kills the player in case it's ever needed.
 
 ~~Other mechanics are explained in-game, so pay attention to those!~~ Nevermind there aren't any other mechanics
 
-# Modding
+## Modding
+
 It's possible to make custom levels if you want to deal with my weird editor system. The keybinds are very odd since I didn't have much time to make this project, but it's usable. The hotkeys have some quirks like keys failing to become unpressed until pressed a second time, but I don't really want to look into that, I'm pretty tired of this project
 
-## Tools
+### Tools
+
 You can use the number keys to switch tools. You can use Y to go to subtool 1, and U to go to subtool 2. Weird, I know.
 
 1. **Tile placement tool** - Place tiles down. Press middle click to select a tile from the map. Press/hold right click to delete a tile. Hold down TAB to open the tile picker.
@@ -35,7 +40,7 @@ You can use the number keys to switch tools. You can use Y to go to subtool 1, a
 9. **Generic entity tool** - Tool to place down any entity by their ID. Right click removes them.
 10. **Start position placement tool** - If you load the game in this room, this is where the player will spawn. This is only really useful in the first room, because checkpoints exist. And save files don't exist.
 
-## Editor hotkeys
+### Editor hotkeys
 
 I know these are bad, however it was a very rushed editor; I just needed something usable.
 
@@ -54,10 +59,12 @@ I know these are bad, however it was a very rushed editor; I just needed somethi
 * `TAB` - Open the tile picker.
 * `SHIFT` - Show debug rendering, including collision, hitboxes etc.
 
-## Technical stuff
+### Technical stuff
+
 Some extra details if you're a nerd.
 
-### Map format
+#### Map format
+
 It's pretty simple, just a JSON file. Everything should be self-explanatory, however the game DOES put every tile on it's own line.
 
 * `collision` is just a 2d array of numbers -- 0 for non-solid, 1 for solid. Other collision types might be coming soon, which is why this isn't a boolean.
@@ -69,7 +76,8 @@ It's pretty simple, just a JSON file. Everything should be self-explanatory, how
 * `width` - The width of the map in tiles.
 * `height` - The height of the map in tiles.
 
-### Entities
+#### Entities
+
 All entities extend from the base class `Entity`. To spawn one, you create a new one (`new Entity(...)`) and then call `addToWorld(Entity entity);` in `Game`. The global instance of `Game` is called `game`. The only entity that carries over room transitions currently is the player, because `addToWorld(player);` is called in `switchMap`.
 
 * `x`, `y`, `width`, `height` - All pretty self-explanatory.
@@ -114,7 +122,8 @@ And for some functions...
 * `getDrawX/Y()` - Get the draw location of the entity.
 * `getCurrentImage()` - Get the current PImage the entity is showing.
 
-### Input
+#### Input
+
 This is pretty simple.
 
 * `Input.down(String key)` - Check if this key is being pressed down.
@@ -125,4 +134,3 @@ This is pretty simple.
 * `clearPressed()` - Unpress all keys. This does not trigger `Input.released`.
 
 Everything else is for internal use only.
-

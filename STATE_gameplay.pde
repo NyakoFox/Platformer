@@ -151,7 +151,7 @@ class GameplayState {
             entities.get(i).update();
         }
 
-        if (Input.pressed("enter")) {
+        if (Input.pressed("enter") && playtesting) {
             MAIN.exitPlaytesting();
             return;
         }

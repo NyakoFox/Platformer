@@ -79,6 +79,7 @@ class MenuState {
         Graphics.outlineText("Arrow keys to select", 162, 480 - 96);
         Graphics.outlineText("Press [Z] to confirm", 161, 480 - 64);
 
-        Graphics.outlineText("https://github.com/NyakoFox/Platformer", 162, 480 - 32);
+        fill(127);
+        Graphics.outlineText("https://github.com/NyakoFox/Platformer", 17, 480 - 32);
     }
 }
