@@ -16,6 +16,7 @@ GameStates STATE = GameStates.MENU;
 
 GameplayState STATE_GAMEPLAY;
 EditorState STATE_EDITOR;
+MenuState STATE_MENU;
 
 platformer MAIN = this;
 
@@ -38,7 +39,7 @@ void setup() {
     // It defaults to 5 which is trilinear which makes the game look really bad
     ((PGraphicsOpenGL)g).textureSampling(2);
 
-    enterState(GameStates.EDITOR);
+    enterState(GameStates.MENU);
 }
 
 void draw() {
@@ -72,10 +73,13 @@ void enterState(GameStates new_state) {
     // Hand these off to the garbage collector if they exist
     STATE_GAMEPLAY = null;
     STATE_EDITOR = null;
+    STATE_MENU = null;
 
     // Set the new state
     switch (new_state) {
         case MENU:
+            STATE_MENU = new MenuState();
+            STATE_MENU.enter();
             break;
         case GAMEPLAY:
             STATE_GAMEPLAY = new GameplayState();
@@ -104,6 +108,7 @@ void mouseReleased() { Input.onMouseReleased(mouseButton); }
 void updateStates() {
     switch (STATE) {
         case MENU:
+            STATE_MENU.update();
             break;
         case GAMEPLAY:
             STATE_GAMEPLAY.update();
@@ -127,6 +132,7 @@ void drawStates() {
 
     switch (STATE) {
         case MENU:
+            STATE_MENU.draw();
             break;
         case GAMEPLAY:
             STATE_GAMEPLAY.draw();
@@ -191,6 +197,7 @@ void drawFade() {
 
         // Draw lines on the edges of the triangles
         stroke(255, 255, 255);
+        strokeWeight(4);
         line(-offset, 0f, 640 - offset, 480);
         line(0 + offset, 0f, 640 + offset, 480);
     }

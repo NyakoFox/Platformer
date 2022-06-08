@@ -220,7 +220,7 @@ class GameplayState {
         if (playtesting) {
             Graphics.outlineText("Press ENTER to return to editor", 16, 32);
         }
-        Graphics.outlineText("FPS: " + frameRate, 16, 64 + 16);
+        //Graphics.outlineText("FPS: " + frameRate, 16, 64 + 16);
 
         // HUD
 
