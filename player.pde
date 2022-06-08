@@ -15,9 +15,6 @@ class Player extends Entity {
     int death_timer = 0;
     int death_angle = 0;
     double death_speed = 0;
-    boolean fading_in = false;
-    boolean fading_out = false;
-    int fade_timer = 0;
 
     Player(double x, double y) {
         super("player", x, y, 10, 24);
@@ -89,21 +86,6 @@ class Player extends Entity {
     }
 
     void update() {
-        if (fading_out) {
-            fade_timer++;
-            if (fade_timer > 30) {
-                fade_timer = 30;
-                fading_out = false;
-            }
-        }
-        if (fading_in) {
-            fade_timer--;
-            if (fade_timer < 0) {
-                fade_timer = 0;
-                fading_in = false;
-            }
-        }
-
         if (dying) {
             noclip = true;
             enableGravity(false);
@@ -128,10 +110,10 @@ class Player extends Entity {
                 setAnimation("explode");
             }
             if (death_timer == 30) {
-                fadeOut();
+                MAIN.fadeOut();
             }
             if (death_timer > 60) {
-                fadeIn();
+                MAIN.fadeIn();
                 noclip = false;
                 enableGravity(true);
                 sprite_offset_x = -6;
@@ -199,11 +181,26 @@ class Player extends Entity {
         super.update();
 
         if (x + width > MAIN.STATE_GAMEPLAY.current_map.real_width) {
-            println("RIGHT");
             x -= MAIN.STATE_GAMEPLAY.current_map.real_width;
             if (!MAIN.STATE_GAMEPLAY.current_map.connected_right.equals("")) {
                 y += MAIN.STATE_GAMEPLAY.current_map.connected_right_offset * 32;
                 MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_right);
+                // Loop through the map entities and find the closest checkpoint to the left side of the screen
+                double closest_distance = Double.MAX_VALUE;
+                for (MapEntity entity : MAIN.STATE_GAMEPLAY.current_map.entities) {
+                    if (entity instanceof CheckpointMapEntity) {
+                        // Distance from the left side of the screen to the checkpoint
+                        double distance = entity.x;
+                        if (distance < closest_distance) {
+                            closest_distance = distance;
+                            checkpoint_x = entity.x;
+                            checkpoint_y = entity.y;
+                            checkpoint_map = MAIN.STATE_GAMEPLAY.current_map.name;
+                        }
+                    }
+                }
+            } else {
+                setCheckpoint();
             }
         }
 
@@ -211,6 +208,22 @@ class Player extends Entity {
             if (!MAIN.STATE_GAMEPLAY.current_map.connected_left.equals("")) {
                 y += MAIN.STATE_GAMEPLAY.current_map.connected_left_offset * 32;
                 MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_left);
+                // Loop through the map entities and find the closest checkpoint to the right side of the screen
+                double closest_distance = Double.MAX_VALUE;
+                for (MapEntity entity : MAIN.STATE_GAMEPLAY.current_map.entities) {
+                    if (entity instanceof CheckpointMapEntity) {
+                        // Distance from the right side of the screen to the checkpoint
+                        double distance = MAIN.STATE_GAMEPLAY.current_map.real_width - entity.x - entity.width;
+                        if (distance < closest_distance) {
+                            closest_distance = distance;
+                            checkpoint_x = entity.x;
+                            checkpoint_y = entity.y;
+                            checkpoint_map = MAIN.STATE_GAMEPLAY.current_map.name;
+                        }
+                    }
+                }
+            } else {
+                setCheckpoint();
             }
             x += MAIN.STATE_GAMEPLAY.current_map.real_width;
         }
@@ -220,6 +233,22 @@ class Player extends Entity {
             if (!MAIN.STATE_GAMEPLAY.current_map.connected_down.equals("")) {
                 x += MAIN.STATE_GAMEPLAY.current_map.connected_down_offset * 32;
                 MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_down);
+                // Loop through the map entities and find the closest checkpoint to the top of the screen
+                double closest_distance = Double.MAX_VALUE;
+                for (MapEntity entity : MAIN.STATE_GAMEPLAY.current_map.entities) {
+                    if (entity instanceof CheckpointMapEntity) {
+                        // Distance from the top of the screen to the checkpoint
+                        double distance = entity.y;
+                        if (distance < closest_distance) {
+                            closest_distance = distance;
+                            checkpoint_x = entity.x;
+                            checkpoint_y = entity.y;
+                            checkpoint_map = MAIN.STATE_GAMEPLAY.current_map.name;
+                        }
+                    }
+                }
+            } else {
+                setCheckpoint();
             }
         }
 
@@ -227,6 +256,22 @@ class Player extends Entity {
             if (!MAIN.STATE_GAMEPLAY.current_map.connected_up.equals("")) {
                 x += MAIN.STATE_GAMEPLAY.current_map.connected_up_offset * 32;
                 MAIN.STATE_GAMEPLAY.switchMap(MAIN.STATE_GAMEPLAY.current_map.connected_up);
+                // Loop through the map entities and find the closest checkpoint to the bottom of the screen
+                double closest_distance = Double.MAX_VALUE;
+                for (MapEntity entity : MAIN.STATE_GAMEPLAY.current_map.entities) {
+                    if (entity instanceof CheckpointMapEntity) {
+                        // Distance from the bottom of the screen to the checkpoint
+                        double distance = MAIN.STATE_GAMEPLAY.current_map.real_height - entity.y - entity.height;
+                        if (distance < closest_distance) {
+                            closest_distance = distance;
+                            checkpoint_x = entity.x;
+                            checkpoint_y = entity.y;
+                            checkpoint_map = MAIN.STATE_GAMEPLAY.current_map.name;
+                        }
+                    }
+                }
+            } else {
+                setCheckpoint();
             }
             y += MAIN.STATE_GAMEPLAY.current_map.real_height;
         }
@@ -280,53 +325,6 @@ class Player extends Entity {
         }
         super.draw();
         tint(255, 255, 255);
-
-        if (fade_timer > 0) {
-            float offset = easeExpoOut(fade_timer, 640, -640, 30);
-            fill(29, 33, 45);
-            noStroke();
-            // Draw a bottom-left triangle
-            triangle(
-                (float)STATE_GAMEPLAY.camera_left + -offset, (float)STATE_GAMEPLAY.camera_top + 0f,
-                (float)STATE_GAMEPLAY.camera_left + -offset, (float)STATE_GAMEPLAY.camera_top + 480,
-                (float)STATE_GAMEPLAY.camera_left + 640 - offset, (float)STATE_GAMEPLAY.camera_top + 480
-            );
-
-            triangle(
-                (float)STATE_GAMEPLAY.camera_left + 0 + offset, (float)STATE_GAMEPLAY.camera_top + 0f,
-                (float)STATE_GAMEPLAY.camera_left + 640 + offset, (float)STATE_GAMEPLAY.camera_top + 0,
-                (float)STATE_GAMEPLAY.camera_left + 640 + offset, (float)STATE_GAMEPLAY.camera_top + 480
-            );
-
-            // Draw lines on the edges of the triangles
-            stroke(255, 255, 255);
-            line(
-                (float)STATE_GAMEPLAY.camera_left + -offset, (float)STATE_GAMEPLAY.camera_top + 0f,
-                (float)STATE_GAMEPLAY.camera_left + 640 - offset, (float)STATE_GAMEPLAY.camera_top + 480
-            );
-            line(
-                (float)STATE_GAMEPLAY.camera_left + 0 + offset, (float)STATE_GAMEPLAY.camera_top + 0f,
-                (float)STATE_GAMEPLAY.camera_left + 640 + offset, (float)STATE_GAMEPLAY.camera_top + 480
-            );
-        }
-    }
-
-    void fadeOut() {
-        fading_in = false;
-        fading_out = true;
-    }
-
-    void fadeIn() {
-        fading_in = true;
-        fading_out = false;
-    }
-
-    // t is the time
-    // b is the beginning value
-    // c is the change in value
-    // d is the duration
-    float easeExpoOut(float t, float b, float c, float d) {
-        return (t==d) ? b+c : c * (-(float)Math.pow(2, -10 * t/d) + 1) + b;
     }
 
     void updateAnimation() {

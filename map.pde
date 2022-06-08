@@ -106,11 +106,16 @@ class Map {
     }
 
     MapEntity createEntityFromName(String name) {
+        // TODO: could replace this with ID lookup,
+        // but I don't have any time because
+        // classes end in two days
         switch (name) {
             case "floppy":
                 return new FloppyMapEntity();
             case "helptext":
                 return new HelpTextMapEntity();
+            case "checkpoint":
+                return new CheckpointMapEntity();
             default:
                 return new ErrorMapEntity();
         }

@@ -444,6 +444,12 @@ class EditorState {
                         }
                         break;
                     case 4: // CHECKPOINTS
+                        if (Input.mousePressed(0)) {
+                            MapEntity entity = placeEntity("checkpoint", mouse_tile_x * 32, mouse_tile_y * 32);
+                            entity.onAdd();
+                        } else if (Input.mousePressed(1)) {
+                            removeEntityUnderCursor();
+                        }
                         break;
                     case 8: // GENERIC ENTITIES
                         if (Input.mousePressed(0)) {
@@ -656,11 +662,19 @@ class EditorState {
                         rect(16 + 4, 16 + 4, 32 - 8, 32 - 8);
                         break;
                     case 3:
-                        tool_name = "COLLECTIBLES";
-                        var sprites = Registry.SPRITES.get("floppy").get("idle");
-                        image(sprites.get((frameCount / 8) % sprites.size()), 16, 16, 32, 32);
-                        break;
-                    case 4: tool_name = "CHECKPOINTS"; break;
+                        {
+                            tool_name = "COLLECTIBLES";
+                            var sprites = Registry.SPRITES.get("floppy").get("idle");
+                            image(sprites.get((frameCount / 8) % sprites.size()), 16, 16, 32, 32);
+                            break;
+                        }
+                    case 4:
+                        {
+                            tool_name = "CHECKPOINTS";
+                            var sprites = Registry.SPRITES.get("checkpoint").get("idle");
+                            image(sprites.get(0), 16, 16, 32, 32);
+                            break;
+                        }
                     case 5: tool_name = "???"; break;
                     case 6: tool_name = "???"; break;
                     case 7: tool_name = "???"; break;

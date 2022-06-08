@@ -385,17 +385,26 @@
   "connected_up": "",
   "connected_down": "",
   "tileset": "indust",
-  "entities": [{
-    "data": {
-      "center_size": 640,
-      "text": "Use ARROW KEYS ([<] [>]) to move",
-      "type": 1
+  "entities": [
+    {
+      "data": {
+        "center_size": 640,
+        "text": "Use ARROW KEYS ([<] [>]) to move",
+        "type": 1
+      },
+      "name": "helptext",
+      "x": 62,
+      "y": 512,
+      "uuid": "3e048d43-209d-4a39-9bac-252fe95b3ffa"
     },
-    "name": "helptext",
-    "x": 62,
-    "y": 512,
-    "uuid": "3e048d43-209d-4a39-9bac-252fe95b3ffa"
-  }],
+    {
+      "data": {},
+      "name": "checkpoint",
+      "x": 576,
+      "y": 384,
+      "uuid": "21c29535-9738-4c5e-8d86-b9443f73a0e4"
+    }
+  ],
   "start_y": 400,
   "width": 20,
   "layers": [[

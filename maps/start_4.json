@@ -341,17 +341,33 @@
   "connected_up": "",
   "connected_down": "",
   "tileset": "indust",
-  "entities": [{
-    "data": {
-      "center_size": 640,
-      "text": "Don't get electrocuted!",
-      "type": 0
+  "entities": [
+    {
+      "data": {
+        "center_size": 640,
+        "text": "Don't get electrocuted!",
+        "type": 0
+      },
+      "name": "helptext",
+      "x": 134,
+      "y": 448,
+      "uuid": "e9a979ca-4871-4420-a605-d394c486fe8b"
     },
-    "name": "helptext",
-    "x": 134,
-    "y": 448,
-    "uuid": "e9a979ca-4871-4420-a605-d394c486fe8b"
-  }],
+    {
+      "data": {},
+      "name": "checkpoint",
+      "x": 32,
+      "y": 256,
+      "uuid": "848308e8-9af9-4bc3-bec5-40dc9edc822b"
+    },
+    {
+      "data": {},
+      "name": "checkpoint",
+      "x": 576,
+      "y": 256,
+      "uuid": "4f63a4b1-22e1-4569-8c74-c47dbce5ad90"
+    }
+  ],
   "start_y": 272,
   "width": 20,
   "layers": [[
@@ -545,7 +561,7 @@
       0,
       0,
       0,
-      90,
+      71,
       94,
       95,
       96,

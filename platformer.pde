@@ -46,6 +46,7 @@ void draw() {
     updateStates();
     // Draw
     drawStates();
+    drawFade();
     // Modify key states
     Input.changeKeys();
 }
@@ -139,5 +140,58 @@ void drawStates() {
             break;
         case CREDITS:
             break;
+    }
+}
+
+boolean fading_in = false;
+boolean fading_out = false;
+int fade_timer = 0;
+
+void fadeOut() {
+    fading_in = false;
+    fading_out = true;
+}
+
+void fadeIn() {
+    fading_in = true;
+    fading_out = false;
+}
+
+// t is the time
+// b is the beginning value
+// c is the change in value
+// d is the duration
+float easeExpoOut(float t, float b, float c, float d) {
+    return (t==d) ? b+c : c * (-(float)Math.pow(2, -10 * t/d) + 1) + b;
+}
+
+void drawFade() {
+    if (fading_out) {
+        fade_timer++;
+        if (fade_timer > 30) {
+            fade_timer = 30;
+            fading_out = false;
+        }
+    }
+    if (fading_in) {
+        fade_timer--;
+        if (fade_timer < 0) {
+            fade_timer = 0;
+            fading_in = false;
+        }
+    }
+
+    if (fade_timer > 0) {
+        float offset = easeExpoOut(fade_timer, 640, -640, 30);
+        fill(29, 33, 45);
+        noStroke();
+        // Draw a bottom-left triangle
+        triangle(-offset, 0f,-offset, 480, 640 - offset, 480);
+        triangle(0 + offset, 0f, 640 + offset, 0, 640 + offset, 480);
+
+        // Draw lines on the edges of the triangles
+        stroke(255, 255, 255);
+        line(-offset, 0f, 640 - offset, 480);
+        line(0 + offset, 0f, 640 + offset, 480);
     }
 }
