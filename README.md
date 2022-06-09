@@ -10,6 +10,7 @@ This platformer was written using [Processing](https://processing.org/), with th
 * The solid tiles, the electricity tiles and the fans were all made by me.
 * The BG tiles and the palette were made by [0x72](https://0x72.itch.io/16x16-industrial-tileset).
 * The explosion in the death animation was from [here](https://xyezawr.itch.io/free-pixel-effects-pack-4-explosions).
+* There's a shader used which wasn't written by me, however the link to the original shader seems to be dead. Read `ripple.glsl` for more information.
 
 ## How do I play?
 
